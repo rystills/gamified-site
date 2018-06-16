@@ -23,7 +23,7 @@
         <h2 class="form-signin-heading">Enter Login Credentials</h2>
         <input type="username" id="username" class="form-control" placeholder="Username" required autofocus>
         <input type="password" id="password" class="form-control" placeholder="Password" required>
-        <button class="btn btn-lg btn-primary btn-block" type="button" onclick="submitNewCredentials()">Login</button>
+        <button class="btn btn-lg btn-primary btn-block" id="submit" type="button" onclick="submitLoginCredentials()">Login</button>
         <div class="etc-login-form">
 		<p>new user? <a href="../../createAccount.html">click here to create an account</a></p>
 	</div>
@@ -31,7 +31,7 @@
     </div>
   </body>
   <script type="text/javascript">
-	function submitNewCredentials() { 
+	function submitLoginCredentials() { 
 		$.ajax({
 			type: "POST",
 			url: 'backend/login.php',
@@ -47,5 +47,14 @@
 			}
 		});
 	}
+	//trigger button click on enter while either input field is active
+	[document.getElementById("username"), document.getElementById("password")].forEach(function(elem) {
+		elem.addEventListener("keyup", function(event) {
+			event.preventDefault();
+			if (event.keyCode === 13) {
+				document.getElementById("submit").click();
+			}
+		});
+	});
   </script>
 </html>
