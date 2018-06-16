@@ -1,0 +1,19 @@
+<header>Login</header>
+Username: <input type="text" name="username" id="username"><br>
+Password: <input type="text" name="password" id="password"><br>
+<button onclick = "submitNewCredentials()">submit</button>
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script type="text/javascript">
+function submitNewCredentials() { 
+	$.ajax({
+		type: "POST",
+		url: 'backend/login.php',
+		data: {username: document.getElementById('username').value, 
+		password: document.getElementById('password').value},
+		success: function(data){
+			alert(data);
+		}
+	});
+}
+</script>
