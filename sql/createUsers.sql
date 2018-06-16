@@ -1,5 +1,6 @@
 CREATE TABLE users (
-   username CHAR(32) NOT NULL,
-   password CHAR(32) NOT NULL,
-   PRIMARY KEY (username)
+    id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
