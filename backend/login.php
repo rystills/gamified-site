@@ -1,31 +1,28 @@
-<?php 
-//db settings
-$servername = "localhost";
-$username = "rising64_admin";
-$password = "admin";
-$dbname = "rising64_data";
-
-// Create connection
-$conn = new mysqli($servername, $username, $password, $dbname);
-// Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-} 
-
-$name = $_POST['username'];
-$pass = $_POST['password'];
-
-$sql = "INSERT INTO users( username, 
-PASSWORD ) 
-VALUES (
-'".$name."', '".$pass."'
-)";
-
-if ($conn->query($sql) === TRUE) {
-    echo "New record created successfully";
-} else {
-    echo "Error: " . $sql . "<br>" . $conn->error;
-}
-
-$conn->close();
+<?php
+   require_once( $_SERVER["DOCUMENT_ROOT"] . "/backend/dbconfig.php");
+   session_start();
+   
+   if($_SERVER["REQUEST_METHOD"] == "POST") {
+      // username and password sent from form 
+      
+      $myusername = mysqli_real_escape_string($conn,$_POST['username']);
+      $mypassword = mysqli_real_escape_string($conn,$_POST['password']); 
+      
+      $sql = "SELECT id FROM users WHERE username = '$myusername' and password = '$mypassword'";
+      $result = mysqli_query($conn,$sql);
+      $row = mysqli_fetch_array($result,MYSQLI_ASSOC);
+      $active = $row['active'];
+      
+      $count = mysqli_num_rows($result);
+      
+      // If result matched $myusername and $mypassword, table row must be 1 row
+		
+      if($count == 1) {
+         $_SESSION['login_user'] = $myusername;
+         echo "Success";
+         exit;
+      }else {
+         echo "Error: Invalid Username or Password";
+      }
+   }
 ?>

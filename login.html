@@ -20,7 +20,7 @@
   <body>
     <div class="container">
       <form class="form-signin">
-        <h2 class="form-signin-heading">Enter Existing Credentials</h2>
+        <h2 class="form-signin-heading">Enter Login Credentials</h2>
         <input type="username" id="username" class="form-control" placeholder="Username" required autofocus>
         <input type="password" id="password" class="form-control" placeholder="Password" required>
         <button class="btn btn-lg btn-primary btn-block" type="button" onclick="submitNewCredentials()">Login</button>
@@ -34,11 +34,16 @@
 	function submitNewCredentials() { 
 		$.ajax({
 			type: "POST",
-			url: 'backend/createAccount.php',
+			url: 'backend/login.php',
 			data: {username: document.getElementById('username').value, 
 			password: document.getElementById('password').value},
 			success: function(data){
-				alert(data);
+				if (data == "Success") {
+					window.location.href = '../../index.php';
+				}
+				else {
+					alert(data);
+				}
 			}
 		});
 	}

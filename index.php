@@ -1,3 +1,7 @@
+<?php
+   include('backend/session.php');
+?>
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -23,9 +27,6 @@
         <h2 class="form-signin-heading">Please Login or Create an Account</h2>
         <button class="btn btn-lg btn-primary btn-block" type="button" onclick="window.location.href='../../createAccount.html'">Create New Account</button>
         <button class="btn btn-lg btn-primary btn-block" type="button" onclick="window.location.href='../../login.html'">Login to Existing Account</button>
-         <div class="etc-login-form">
-		<p>Not a user? <a href="../../login.html">click here to create an account</a></p>
-	</div>
       </form>
     </div>
   </body>
