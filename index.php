@@ -19,26 +19,26 @@
     <!-- Custom styles for this template -->
     <link href="../../signin.css" rel="stylesheet">
     
-    <title>Welcome to imryans.com</title>
+    <title>Welcome Back to imryans.com</title>
   </head>
   <body>
     <div class="container">
       <form class="form-signin">
-        <h2 class="form-signin-heading">Please Login or Create an Account</h2>
-        <button class="btn btn-lg btn-primary btn-block" type="button" onclick="window.location.href='../../createAccount.html'">Create New Account</button>
-        <button class="btn btn-lg btn-primary btn-block" type="button" onclick="window.location.href='../../login.html'">Login to Existing Account</button>
+        <h2 class="form-signin-heading">Welcome Back, <?php echo $_SESSION['login_user'];?></h2>
+        <div class="etc-login-form">
+		<p>Not you? <a onClick="logout();" style="cursor: pointer; cursor: hand;">Click here to log out</a></p>
+	</div>
       </form>
     </div>
   </body>
   <script type="text/javascript">
-	function submitNewCredentials() { 
+	function logout() { 
 		$.ajax({
 			type: "POST",
-			url: 'backend/createAccount.php',
-			data: {username: document.getElementById('username').value, 
-			password: document.getElementById('password').value},
+			url: 'backend/logout.php',
+			data: {},
 			success: function(data){
-				alert(data);
+				location.reload();
 			}
 		});
 	}
