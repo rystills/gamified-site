@@ -22,6 +22,8 @@ function render() {
 	clearScreen();
 	
 	drawTerrain();
+	drawWalls();
+	drawTargets();
 	
 	//draw all objects with images specified, centered in order of list indices
 	for (let i = 0; i < objects.length; ++i) {
@@ -30,8 +32,48 @@ function render() {
 		}
 	}
 	
+	if (placing) {
+		drawPlacer();
+	}
+	
 	//finally draw the HUD
 	drawHUD();
+}
+
+/**
+ * draw all user-placed walls
+ */
+function drawWalls() {
+	ctx.lineWidth = 4;
+	ctx.strokeStyle = '#BBBB33';
+	for (let i = 0; i < wallVerts.length-1; i+=2) {
+		ctx.beginPath();
+	    ctx.moveTo(wallVerts[i].x,wallVerts[i].y);
+	    ctx.lineTo(wallVerts[i+1].x,wallVerts[i+1].y);
+	    ctx.stroke();
+	}
+	if (wallVerts.length%2 != 0) {
+		ctx.beginPath();
+		ctx.moveTo(wallVerts[wallVerts.length-1].x,wallVerts[wallVerts.length-1].y);
+	    ctx.lineTo(cnv.mousePos.x,cnv.mousePos.y);
+	    ctx.stroke();
+	}
+}
+
+/**
+ * draw all user-placed targets
+ */
+function drawTargets() {
+	for (let i = 0; i < targetLocs.length; ++i) {
+		drawCentered("target",ctx, targetLocs[i].x,targetLocs[i].y);
+	}
+}
+
+/**
+ * draw the placer at the location of the mouse
+ */
+function drawPlacer() {
+	drawCentered("star",ctx, cnv.mousePos.x,cnv.mousePos.y,totalTime*100);
 }
 
 /**
@@ -92,6 +134,8 @@ function drawHUD() {
 function update() {
 	//update the deltaTime
 	updateTime();
+	
+	updatePlacer();
 		
 	//update objects
 	for (let i = 0; i < objects.length; objects[i].update(), ++i);
@@ -125,6 +169,7 @@ function initCanvases() {
 function loadAssets() {
 	//setup a global, ordered list of asset files to load
 	requiredFiles = [
+		"images\\star.png", "images\\target.png", //images
 		"src\\util.js","src\\setupKeyListeners.js", //misc functions
 		"src\\classes\\Enum.js", "src\\classes\\Button.js" //classes
 		];
@@ -146,9 +191,50 @@ function randomizeTerrain() {
 	for (let i = 0; i < numTerrainVerts; ++i) {
 		terrainVerts.push({x: cnv.width * (i/(numTerrainVerts-1)), 
 		y:clamp(i == 0 ? getRandomInt(minTerrainStartY,cnv.height - minTerrainStartY - 1) : 
-		terrainVerts[i-1].y + getRandomInt(-5,6),minTerrainY, cnv.height-minTerrainY-1)});
+		terrainVerts[i-1].y + getRandomInt(-5,6),minTerrainY, cnv.height-minTerrainY - 1)});
 	}
 }
+
+/**
+ * start the object placer
+ * @param type: the object type we wish to place
+ */
+function startPlacer(type) {
+	stopPlacer();
+	placing = true;
+	placeType = type;
+}
+
+/** 
+ * stop the placer
+ */
+function stopPlacer() {
+	placing = false;
+	//if we have an odd number of wall verts, remove the last one
+	if (wallVerts.length%2 != 0) {
+		wallVerts.splice(-1,1);
+	}
+}
+
+/**
+ * update the placer, stopping on rightclick and adding a point on leftclick
+ */
+function updatePlacer() {
+	if (!placing) {
+		return;
+	}
+	if (mousePressedRight) {
+		stopPlacer();
+	}
+	else if (mousePressedLeft && pointInRect(cnv.mousePos.x,cnv.mousePos.y,cnv)) {
+		if (placeType == placeTypes.wall) {
+			wallVerts.push(cnv.mousePos);
+		}
+		else if (placeType == placeTypes.target) {
+			targetLocs.push(cnv.mousePos);
+		}
+	}
+} 
 
 /**
  * initialize all global variables
@@ -165,24 +251,36 @@ function initGlobals() {
 	//global game objects
 	objects = [];
 	
+	//terrain
 	terrainVerts = [];
 	numTerrainVerts = 400;
 	minTerrainY = 50;
-	minTerrainStartY = 150;
+	minTerrainStartY = 200;
 	randomizeTerrain();
+	
+	//walls and targets
+	wallVerts = [];
+	targetLocs = [];
+	
+	//placer
+	placing = false;
+	placeTypes = new Enum("wall","target");
+	placeType = null;
 	
 	//global list of UI buttons
 	buttons = [];
-	buttons.push(new Button(10,10,uicnv,"RandomizeTerrain",24,randomizeTerrain));
+	buttons.push(new Button(10,10,uicnv,"Randomize Terrain",24,randomizeTerrain));
+	buttons.push(new Button(10,60,uicnv,"Place Wall",24,startPlacer,placeTypes.wall));
+	buttons.push(new Button(10,110,uicnv,"Place Target",24,startPlacer,placeTypes.target));
 	
-	//misc properties
-	skyGradient = ctx.createLinearGradient(0,0,0,cnv.height);
-	skyGradient.addColorStop(0,"blue");
-	skyGradient.addColorStop(1,"purple");
+	//gradients
+	skyGradient = ctx.createRadialGradient(850,500,1,500,600,900);
+	skyGradient.addColorStop(0,"purple");
+	skyGradient.addColorStop(1,"blue");
 	
 	groundGradient = ctx.createLinearGradient(cnv.width,0,0,cnv.height);
-	groundGradient.addColorStop(0,"yellow");
-	groundGradient.addColorStop(1,"green");
+	groundGradient.addColorStop(0,"#ff59b2");
+	groundGradient.addColorStop(1,"#387517");
 }
 
 //disallow right-click context menu as right click functionality is often necessary for gameplay
