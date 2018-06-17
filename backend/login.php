@@ -14,11 +14,13 @@
       $active = $row['active'];
       
       $count = mysqli_num_rows($result);
+      mysqli_close($con);
       
       // If result matched $myusername and $mypassword, table row must be 1 row
 		
       if($count == 1) {
-         $_SESSION['login_user'] = $myusername;
+         //add username to session data
+         $_SESSION['username'] = $myusername;
          echo "Success";
          exit;
       }else {

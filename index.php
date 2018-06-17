@@ -24,7 +24,8 @@
   <body>
     <div class="container">
       <form class="form-signin">
-        <h2 class="form-signin-heading">Welcome Back, <?php echo $_SESSION['login_user'];?></h2>
+        <h2 class="form-signin-heading">Welcome Back, <?php echo $_SESSION['username'];?></h2>
+        <h2 class="form-signin-heading">Current Score: <?php echo $_SESSION['score'];?></h2>
         <div class="etc-login-form">
 		<p>Not you? <a onClick="logout();" style="cursor: pointer; cursor: hand;">Click here to log out</a></p>
 	</div>
