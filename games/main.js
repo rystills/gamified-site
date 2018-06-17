@@ -3,7 +3,10 @@
  */
 function clearScreen() {
 	//main canvas
-	ctx.fillStyle="#add8e6";
+	//clear to sky gradient
+
+	// Fill with gradient
+	ctx.fillStyle=skyGradient;
 	ctx.fillRect(0,0,cnv.width,cnv.height);
 	
 	//HUD canvas
@@ -18,6 +21,8 @@ function render() {
 	//clear all canvases for a fresh render
 	clearScreen();
 	
+	drawTerrain();
+	
 	//draw all objects with images specified, centered in order of list indices
 	for (let i = 0; i < objects.length; ++i) {
 		if (objects[i].imgName) {
@@ -30,12 +35,32 @@ function render() {
 }
 
 /**
+ * draw the terrain using terrainVerts data
+ */
+function drawTerrain() {
+	ctx.fillStyle=groundGradient;
+	for (let i = 0; i < terrainVerts.length-1; ++i) {
+		// Filled triangles (half pixel horizontal offsets to remove visual artifacts from floating point graphics)
+		floatBuffer = .5;
+	    ctx.beginPath();
+	    ctx.moveTo(terrainVerts[i].x-floatBuffer, terrainVerts[i].y);
+	    ctx.lineTo(terrainVerts[i+1].x+floatBuffer, terrainVerts[i+1].y);
+	    ctx.lineTo(terrainVerts[i].x-floatBuffer, 600);
+	    ctx.fill();
+	    ctx.moveTo(terrainVerts[i].x-floatBuffer, 600);
+	    ctx.lineTo(terrainVerts[i+1].x+floatBuffer, terrainVerts[i+1].y);
+	    ctx.lineTo(terrainVerts[i+1].x+floatBuffer, 600);
+	    ctx.fill();
+	}
+}
+
+/**
  * draw the HUD
  */
 function drawHUD() {
 	//draw buttons
-	for (var i = 0; i < buttons.length; ++i) {
-		var btnctx = buttons[i].canvas.getContext("2d");
+	for (let i = 0; i < buttons.length; ++i) {
+		let btnctx = buttons[i].canvas.getContext("2d");
 		//fill light blue border color
 		btnctx.fillStyle = "rgb(" +  
 		Math.round(.15 * buttons[i].blendWhiteness) + ", " + 
@@ -114,6 +139,18 @@ function loadAssets() {
 }
 
 /**
+ * randomize the list of terrain verts
+ */
+function randomizeTerrain() {
+	terrainVerts.length = 0;
+	for (let i = 0; i < numTerrainVerts; ++i) {
+		terrainVerts.push({x: cnv.width * (i/(numTerrainVerts-1)), 
+		y:clamp(i == 0 ? getRandomInt(minTerrainStartY,cnv.height - minTerrainStartY - 1) : 
+		terrainVerts[i-1].y + getRandomInt(-5,6),minTerrainY, cnv.height-minTerrainY-1)});
+	}
+}
+
+/**
  * initialize all global variables
  */
 function initGlobals() {
@@ -125,12 +162,27 @@ function initGlobals() {
 	deltaTime = 0;
 	totalTime = 0;
 	
-	
 	//global game objects
 	objects = [];
 	
+	terrainVerts = [];
+	numTerrainVerts = 400;
+	minTerrainY = 50;
+	minTerrainStartY = 150;
+	randomizeTerrain();
+	
 	//global list of UI buttons
 	buttons = [];
+	buttons.push(new Button(10,10,uicnv,"RandomizeTerrain",24,randomizeTerrain));
+	
+	//misc properties
+	skyGradient = ctx.createLinearGradient(0,0,0,cnv.height);
+	skyGradient.addColorStop(0,"blue");
+	skyGradient.addColorStop(1,"purple");
+	
+	groundGradient = ctx.createLinearGradient(cnv.width,0,0,cnv.height);
+	groundGradient.addColorStop(0,"yellow");
+	groundGradient.addColorStop(1,"green");
 }
 
 //disallow right-click context menu as right click functionality is often necessary for gameplay

@@ -43,5 +43,9 @@
 			}
 		});
 	}
+ 
+  	let sessionId = "<?php echo $_SESSION['score']; ?>";
+	console.log(sessionId);
+
   </script>
 </html>

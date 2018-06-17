@@ -193,6 +193,16 @@ function updateTime() {
 }
 
 /**
+ * clamp the specified value to the specified bounds
+ * @param min: the minimum value allowed
+ * @param max: the maximum value allowed
+ * @returns the provided value clamped between min and max (both inclusive)
+ */
+function clamp(value, min, max) {
+  	return Math.min(Math.max(value, min), max);
+};
+
+/**
  * calls initGlobals and begins the main update loop; to be called after resource loading
  */
 function startGame() {
