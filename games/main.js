@@ -24,6 +24,7 @@ function render() {
 	drawTerrain();
 	drawWalls();
 	drawTargets();
+	drawPlayer();
 	
 	//draw all objects with images specified, centered in order of list indices
 	for (let i = 0; i < objects.length; ++i) {
@@ -39,6 +40,36 @@ function render() {
 	//finally draw the HUD
 	drawHUD();
 }
+
+/**
+ * draw the player tank
+ */
+ function drawPlayer() {
+ 	//draw tank body
+ 	ctx.beginPath();
+	ctx.arc(playerPos.x, playerPos.y + (playerRad/2), playerRad, Math.PI + playerRot, 2*Math.PI + playerRot, false);
+	ctx.closePath();
+	ctx.lineWidth = 1;
+	ctx.fillStyle = 'red';
+	ctx.fill();
+	ctx.strokeStyle = '#550000';
+	ctx.stroke();
+	
+	//draw tank gun
+	ctx.lineWidth = playerGunWidth;
+	ctx.strokeStyle = '#8B0000';
+	ctx.beginPath();
+	//calculate gun start pos 
+	let gunStartX = playerPos.x + Math.cos(-Math.PI/2 + playerRot) * 6;
+	let gunStartY = playerPos.y + (playerRad/2) + Math.sin(-Math.PI/2 + playerRot) * 6;
+    ctx.moveTo(gunStartX,gunStartY);
+    //calculate gun end pos
+    let gunFinalX = gunStartX + Math.cos(playerShotAng) * playerGunLength;
+    let gunFinalY = gunStartY + Math.sin(playerShotAng) * playerGunLength;
+    ctx.lineTo(gunFinalX,gunFinalY);
+    ctx.stroke();
+    console.log(gunFinalX + ", " + gunFinalY);
+ }
 
 /**
  * draw all user-placed walls
@@ -201,6 +232,7 @@ function randomizeTerrain() {
 		y:clamp(i == 0 ? getRandomInt(minTerrainStartY,cnv.height - minTerrainStartY - 1) : 
 		terrainVerts[i-1].y + getRandomInt(-5,6),minTerrainY, cnv.height-minTerrainY - 1)});
 	}
+	playerPos = calcPlayerPosRot(playerPos.x);
 }
 
 /**
@@ -225,11 +257,38 @@ function stopPlacer() {
 }
 
 /**
+ * calculate the player's y position and rotation from the terrain, given his x position
+ * @param x: the player's desired x position
+ * @returns the player's final {x,y} position 
+ */
+function calcPlayerPosRot(x) {
+	//find the two nearest points
+	let pts = [];
+	for (let i = 0; i < terrainVerts.length; ++i) {
+		if (terrainVerts[i].x > x) {
+			pts.push(terrainVerts[i-1]);
+			pts.push(terrainVerts[i]);
+			break;
+		}
+	}
+	//calculate slope
+	let slope = (pts[1].y - pts[0].y) / (pts[1].x - pts[0].x);
+	playerRot = getAngle(pts[0].x,pts[0].y,pts[1].x,pts[1].y,true);
+	//solve for y
+	y = pts[1].y - (slope * (pts[1].x - x));
+	//offset player y from center to bottom
+	return {"x":x,"y":y - playerRad/2};
+}
+
+/**
  * update the placer, stopping on rightclick and adding a point on leftclick
  */
 function updatePlacer() {
 	if (!placing) {
 		return;
+	}
+	if (placeType == placeTypes.player) {
+		playerPos = calcPlayerPosRot(clamp(cnv.mousePos.x,minPlayerPos,cnv.width-minPlayerPos));
 	}
 	if (mousePressedRight) {
 		stopPlacer();
@@ -260,6 +319,9 @@ function updatePlacer() {
 			else if (placeType == placeTypes.target) {
 				targetLocs.push(cnv.mousePos);
 			}
+			else if (placeType == placeTypes.player) {
+				stopPlacer();
+			}
 		}
 	}
 } 
@@ -279,6 +341,18 @@ function initGlobals() {
 	//global game objects
 	objects = [];
 	
+	//placer
+	placing = false;
+	placeTypes = new Enum("wall","target", "eraser", "player");
+	placeType = null;
+	minPlayerPos = 16;
+	playerGunWidth = 2;
+	playerGunLength = 10;
+	playerRad = 8;
+	playerRot = 0;
+	playerPos = {x:100,y:0};
+	playerShotAng = 0;
+	
 	//terrain
 	terrainVerts = [];
 	numTerrainVerts = 400;
@@ -293,17 +367,13 @@ function initGlobals() {
 	eraserRadius = 16;
 	targetRadius = 16;
 	
-	//placer
-	placing = false;
-	placeTypes = new Enum("wall","target", "eraser");
-	placeType = null;
-	
 	//global list of UI buttons
 	buttons = [];
 	buttons.push(new Button(10,10,uicnv,"Randomize Terrain",24,randomizeTerrain));
 	buttons.push(new Button(10,60,uicnv,"Place Wall",24,startPlacer,placeTypes.wall));
 	buttons.push(new Button(10,110,uicnv,"Place Target",24,startPlacer,placeTypes.target));
-	buttons.push(new Button(10,160,uicnv,"Eraser",24,startPlacer,placeTypes.eraser));
+	buttons.push(new Button(10,160,uicnv,"Place Player",24,startPlacer,placeTypes.player));
+	buttons.push(new Button(10,210,uicnv,"Eraser",24,startPlacer,placeTypes.eraser));
 	
 	//gradients
 	skyGradient = ctx.createRadialGradient(850,500,1,500,600,900);

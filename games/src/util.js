@@ -184,7 +184,7 @@ function pointInRect(px,py,obj, objectPosIsTopLeft) {
  * check whether a circle and a line are overlapping (true) or not (false)
  * @param circRad: the radius of the circle
  * @param circPos: the position of the circle
- * @param lineWidth: the width of the line
+ * @param lineWidth: the thickness of the line
  * @param lineSPos: the start position of the line
  * @param lineEPos: the end position of the line
  * @returns whether the circle and line are overlapping (true) or not (false)
