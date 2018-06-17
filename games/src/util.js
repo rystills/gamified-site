@@ -150,12 +150,12 @@ function getDistance(x1,y1,x2,y2) {
 }
 
 /**
- * check for a collision between objects a and b
+ * check for a collision between objects a and b using AABBs
  * @param a: the first collision object
  * @param b: the second collision object
  * @returns whether there is a collision between the objects (true) or not (false)
  */
-function collisionCheck(a,b) {
+function collisionRect(a,b) {
 	return (Math.abs(a.x - b.x) * 2 < (a.width + b.width)) &&
     (Math.abs(a.y - b.y) * 2 < (a.height + b.height));
 }
@@ -178,7 +178,37 @@ function pointInRect(px,py,obj, objectPosIsTopLeft) {
 	}
 	return (px >= obj.x - obj.width/2 && px < obj.x + obj.width/2
 			&& py >= obj.y - obj.height/2 && py < obj.y + obj.height/2); 	
-	
+}
+
+/**
+ * check whether a circle and a line are overlapping (true) or not (false)
+ * @param circRad: the radius of the circle
+ * @param circPos: the position of the circle
+ * @param lineWidth: the width of the line
+ * @param lineSPos: the start position of the line
+ * @param lineEPos: the end position of the line
+ * @returns whether the circle and line are overlapping (true) or not (false)
+ */
+function collisionCircleLine(circRad, circPos, lineWidth, lineSPos, lineEPos) {
+	hitDist = pointLineSegmentDistance(lineSPos, lineEPos, circPos);
+	return hitDist < circRad + lineWidth/2;
+}
+
+/**
+ * find the shortest distance between a line segment and another point
+ * @param v: the first point on the line
+ * @param w: the second point on the line
+ * @param p: the other point used for comparison
+ * @returns the closest distance on the specified line segment from the specified point
+ */
+function pointLineSegmentDistance(v, w, p) {
+	l2 = Math.pow(v.x - w.x, 2) + Math.pow(v.y - w.y, 2);
+	if (l2 == 0.0) return distance(p.x, p.y, v.x, v.y); 
+	pminusv = {x:p.x-v.x, y:p.y-v.y};
+	wminusv = {x:w.x-v.x, y:w.y-v.y};
+	t = Math.max(0, Math.min(1, (pminusv.x*wminusv.x + pminusv.y*wminusv.y) / l2));
+	projection = {x:(w.x - v.x)*t+v.x, y:(w.y-v.y)*t+v.y}; 
+	return getDistance(p.x,p.y, projection.x, projection.y);
 }
 
 /**

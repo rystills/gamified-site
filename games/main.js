@@ -44,7 +44,7 @@ function render() {
  * draw all user-placed walls
  */
 function drawWalls() {
-	ctx.lineWidth = 4;
+	ctx.lineWidth = wallWidth;
 	ctx.strokeStyle = '#BBBB33';
 	for (let i = 0; i < wallVerts.length-1; i+=2) {
 		ctx.beginPath();
@@ -73,7 +73,15 @@ function drawTargets() {
  * draw the placer at the location of the mouse
  */
 function drawPlacer() {
-	drawCentered("star",ctx, cnv.mousePos.x,cnv.mousePos.y,totalTime*100);
+	if (placeType == placeTypes.wall) {
+		drawCentered("star",ctx, cnv.mousePos.x,cnv.mousePos.y,totalTime*100);
+	}
+	else if (placeType == placeTypes.target) {
+		drawCentered("target",ctx,cnv.mousePos.x,cnv.mousePos.y,0);
+	}
+	else if (placeType == placeTypes.eraser) {
+		drawCentered("eraser",ctx,cnv.mousePos.x,cnv.mousePos.y,0);
+	}
 }
 
 /**
@@ -169,7 +177,7 @@ function initCanvases() {
 function loadAssets() {
 	//setup a global, ordered list of asset files to load
 	requiredFiles = [
-		"images\\star.png", "images\\target.png", //images
+		"images\\star.png", "images\\target.png", "images\\eraser.png", //images
 		"src\\util.js","src\\setupKeyListeners.js", //misc functions
 		"src\\classes\\Enum.js", "src\\classes\\Button.js" //classes
 		];
@@ -226,12 +234,32 @@ function updatePlacer() {
 	if (mousePressedRight) {
 		stopPlacer();
 	}
-	else if (mousePressedLeft && pointInRect(cnv.mousePos.x,cnv.mousePos.y,cnv)) {
-		if (placeType == placeTypes.wall) {
-			wallVerts.push(cnv.mousePos);
+	else if (pointInRect(cnv.mousePos.x,cnv.mousePos.y,cnv)) {
+		if (placeType == placeTypes.eraser) {
+			if (mouseDownLeft) {
+				//check erase targets
+				for (let i = 0; i < targetLocs.length; ++i) {
+					if (getDistance(cnv.mousePos.x,cnv.mousePos.y,targetLocs[i].x,targetLocs[i].y) < eraserRadius + targetRadius) {
+						targetLocs.splice(i, 1);
+						--i;
+					}
+				}
+				//check erase walls
+				for (let i = 0; i < wallVerts.length-1; i+=2) {
+					if (collisionCircleLine(eraserRadius,cnv.mousePos,wallWidth,wallVerts[i],wallVerts[i+1])) {
+						wallVerts.splice(i,2);
+						i-=2;
+					}
+				}
+			}
 		}
-		else if (placeType == placeTypes.target) {
-			targetLocs.push(cnv.mousePos);
+		else if (mousePressedLeft) {
+			if (placeType == placeTypes.wall) {
+				wallVerts.push(cnv.mousePos);
+			}
+			else if (placeType == placeTypes.target) {
+				targetLocs.push(cnv.mousePos);
+			}
 		}
 	}
 } 
@@ -261,10 +289,13 @@ function initGlobals() {
 	//walls and targets
 	wallVerts = [];
 	targetLocs = [];
+	wallWidth = 4;
+	eraserRadius = 16;
+	targetRadius = 16;
 	
 	//placer
 	placing = false;
-	placeTypes = new Enum("wall","target");
+	placeTypes = new Enum("wall","target", "eraser");
 	placeType = null;
 	
 	//global list of UI buttons
@@ -272,6 +303,7 @@ function initGlobals() {
 	buttons.push(new Button(10,10,uicnv,"Randomize Terrain",24,randomizeTerrain));
 	buttons.push(new Button(10,60,uicnv,"Place Wall",24,startPlacer,placeTypes.wall));
 	buttons.push(new Button(10,110,uicnv,"Place Target",24,startPlacer,placeTypes.target));
+	buttons.push(new Button(10,160,uicnv,"Eraser",24,startPlacer,placeTypes.eraser));
 	
 	//gradients
 	skyGradient = ctx.createRadialGradient(850,500,1,500,600,900);
