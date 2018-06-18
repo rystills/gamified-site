@@ -2,6 +2,10 @@
  * update the button's state, activating it in the event of a mouse click
  */
 Button.prototype.update = function() {
+	if (!this.active) {
+		this.blendWhiteness = 55;
+		return;
+	}
 	//check mouse button status
 	//check if mouse is on this button 
 	let mousing = pointInRect(this.canvas.mousePos.x,this.canvas.mousePos.y,this,true);
@@ -80,5 +84,6 @@ function Button(x,y,cnv, text, fontSize, clickFunc,clickArg) {
 	context.font = this.fontSize + "px Arial";
 	//add a 4 pixel border to the text dimensions to make room for button outline + fill
     this.width = context.measureText(this.text).width + 8;
-    this.height = this.fontSize + 4;
+	this.height = this.fontSize + 4;
+	this.active = true;
 }

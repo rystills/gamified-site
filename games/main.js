@@ -37,10 +37,32 @@ function render() {
 		drawPlacer();
 	}
 	
+	drawAmmo();
+	drawFuel();
+	
 	//finally draw the HUD
 	drawHUD();
 }
 
+/**
+ * draw a meter indicating remaining fuel
+ */
+ function drawFuel() {
+ 	ctx.fillStyle = "red";
+ 	ctx.fillRect(20,30,100,20);
+ 	ctx.fillStyle = "green";
+ 	ctx.fillRect(20,30,100 * (fuel/maxFuel),20);
+ }
+
+/**
+ * draw a bullet sprite for each shot available to the player
+ */
+ function drawAmmo() {
+ 	for (let i = 0; i < numShots; ++i) {
+ 		drawCentered("bullet",ctx, 150 + 35*i, 40);
+ 	}	
+ }
+ 
 /**
  * draw the player tank
  */
@@ -68,7 +90,6 @@ function render() {
     let gunFinalY = gunStartY + Math.sin(playerShotAng) * playerGunLength;
     ctx.lineTo(gunFinalX,gunFinalY);
     ctx.stroke();
-    console.log(gunFinalX + ", " + gunFinalY);
  }
 
 /**
@@ -175,6 +196,10 @@ function update() {
 	updateTime();
 	
 	updatePlacer();
+	
+	if (gameMode == gameModes.play) {
+		updatePlayer();
+	}
 		
 	//update objects
 	for (let i = 0; i < objects.length; objects[i].update(), ++i);
@@ -188,6 +213,22 @@ function update() {
 	//toggle off any one-frame event indicators at the end of the update tick
 	mousePressedLeft = false;
 	mousePressedRight = false;
+}
+
+/**
+ * update the player tank during play mode
+ */
+function updatePlayer() {
+	if (fuel > 0) {
+		if (keyStates["A"] && playerPos.x > minPlayerPos) {
+			calcPlayerPosRot(playerPos.x-1, false);
+			--fuel;
+		}
+		else if (keyStates["D"] && playerPos.x < cnv.width - minPlayerPos) {
+			calcPlayerPosRot(playerPos.x+1, false);
+			--fuel;
+		}
+	}
 }
 
 /**
@@ -208,7 +249,7 @@ function initCanvases() {
 function loadAssets() {
 	//setup a global, ordered list of asset files to load
 	requiredFiles = [
-		"images\\star.png", "images\\target.png", "images\\eraser.png", //images
+		"images\\star.png", "images\\target.png", "images\\eraser.png", "images\\bullet.png", //images
 		"src\\util.js","src\\setupKeyListeners.js", //misc functions
 		"src\\classes\\Enum.js", "src\\classes\\Button.js" //classes
 		];
@@ -232,7 +273,7 @@ function randomizeTerrain() {
 		y:clamp(i == 0 ? getRandomInt(minTerrainStartY,cnv.height - minTerrainStartY - 1) : 
 		terrainVerts[i-1].y + getRandomInt(-5,6),minTerrainY, cnv.height-minTerrainY - 1)});
 	}
-	playerPos = calcPlayerPosRot(playerPos.x);
+	calcPlayerPosRot(playerPos.x);
 }
 
 /**
@@ -259,9 +300,10 @@ function stopPlacer() {
 /**
  * calculate the player's y position and rotation from the terrain, given his x position
  * @param x: the player's desired x position
+ * @paaram updateStartPos: whether to change playerStartPos, or just playerPos
  * @returns the player's final {x,y} position 
  */
-function calcPlayerPosRot(x) {
+function calcPlayerPosRot(x,updateStartPos = true) {
 	//find the two nearest points
 	let pts = [];
 	for (let i = 0; i < terrainVerts.length; ++i) {
@@ -277,7 +319,10 @@ function calcPlayerPosRot(x) {
 	//solve for y
 	y = pts[1].y - (slope * (pts[1].x - x));
 	//offset player y from center to bottom
-	return {"x":x,"y":y - playerRad/2};
+	playerPos = {"x":x,"y":y - playerRad/2};
+	if (updateStartPos) {
+		playerStartPos = playerPos;
+	}
 }
 
 /**
@@ -288,7 +333,7 @@ function updatePlacer() {
 		return;
 	}
 	if (placeType == placeTypes.player) {
-		playerPos = calcPlayerPosRot(clamp(cnv.mousePos.x,minPlayerPos,cnv.width-minPlayerPos));
+		calcPlayerPosRot(clamp(cnv.mousePos.x,minPlayerPos,cnv.width-minPlayerPos));
 	}
 	if (mousePressedRight) {
 		stopPlacer();
@@ -327,6 +372,19 @@ function updatePlacer() {
 } 
 
 /**
+ * toggle between play and build modes
+ */
+function toggleGameMode() {
+	gameMode = (gameMode == gameModes.build ? gameModes.play : gameModes.build);
+	playerPos = playerStartPos;
+	numShots = maxNumShots;
+	fuel = maxFuel;
+	//toggle active flag on settings buttons when starting/stopping the game
+	for (let i = 0; i < 5; buttons[i].active = !buttons[i].active, ++i);
+	buttons[5].text = (gameMode == gameModes.build ? "play" : "stop");
+}
+
+/**
  * initialize all global variables
  */
 function initGlobals() {
@@ -341,17 +399,30 @@ function initGlobals() {
 	//global game objects
 	objects = [];
 	
+	//game modes
+	gameModes = new Enum("build","play");
+	gameMode = gameModes.build;
+	
 	//placer
 	placing = false;
 	placeTypes = new Enum("wall","target", "eraser", "player");
 	placeType = null;
+	
+	//player
 	minPlayerPos = 16;
 	playerGunWidth = 2;
 	playerGunLength = 10;
 	playerRad = 8;
 	playerRot = 0;
-	playerPos = {x:100,y:0};
-	playerShotAng = 0;
+	playerStartPos = {x:100,y:0};
+	playerPos = playerStartPos;
+	playerShotAng = -Math.PI/8;
+	
+	//settings
+	maxNumShots = 3;
+	numShots = maxNumShots;
+	maxFuel = 100;
+	fuel = maxFuel;
 	
 	//terrain
 	terrainVerts = [];
@@ -374,6 +445,7 @@ function initGlobals() {
 	buttons.push(new Button(10,110,uicnv,"Place Target",24,startPlacer,placeTypes.target));
 	buttons.push(new Button(10,160,uicnv,"Place Player",24,startPlacer,placeTypes.player));
 	buttons.push(new Button(10,210,uicnv,"Eraser",24,startPlacer,placeTypes.eraser));
+	buttons.push(new Button(10,260,uicnv,"Play",24,toggleGameMode));
 	
 	//gradients
 	skyGradient = ctx.createRadialGradient(850,500,1,500,600,900);
