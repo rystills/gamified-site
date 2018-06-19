@@ -26,16 +26,15 @@ function render() {
 	drawTargets();
 	drawPlayer();
 	
-	//draw all objects with images specified, centered in order of list indices
-	for (let i = 0; i < objects.length; ++i) {
-		if (objects[i].imgName) {
-			drawCentered(objects[i].imgName,ctx, objects[i].x, objects[i].y,objects[i].dir);	
-		}
-	}
-	
 	if (placing) {
 		drawPlacer();
 	}
+	
+	if (choosingPower) {
+		drawPowerBar();
+	}
+	
+	drawBullets();
 	
 	drawAmmo();
 	drawFuel();
@@ -45,15 +44,59 @@ function render() {
 }
 
 /**
+ * draw all bullets in order
+ */
+function drawBullets() {
+	for (let i = 0; i < bullets.length; ++i) {
+		ctx.beginPath();
+		ctx.arc(bullets[i].x,bullets[i].y,4,0,2*Math.PI);
+		ctx.closePath();
+		ctx.lineWidth = 1;
+		ctx.fillStyle = 'white';
+		ctx.fill();
+		ctx.strokeStyle = 'black';
+		ctx.stroke();
+	}
+}
+
+/**
+ * draw a power indicator while the player is preparing a shot
+ */
+function drawPowerBar() {
+	//calculate max power triangle points
+	let pt0 = gunFinalPos;
+	let pt1 = {x:pt0.x + Math.cos(playerShotAng-.2) * 100,y:pt0.y + Math.sin(playerShotAng-.2) * 100};
+	let pt2 = {x:pt0.x + Math.cos(playerShotAng+.2) * 100,y:pt0.y + Math.sin(playerShotAng+.2) * 100};
+	//draw triangle
+	ctx.fillStyle = '#FF0000';
+	ctx.beginPath();
+	ctx.moveTo(pt0.x,pt0.y);
+    ctx.lineTo(pt1.x,pt1.y);
+    ctx.lineTo(pt2.x,pt2.y);
+    ctx.fill();
+	
+	//calculate power triangle points
+	pt1 = {x:pt0.x + Math.cos(playerShotAng-.2) * power,y:pt0.y + Math.sin(playerShotAng-.2) * power};
+	pt2 = {x:pt0.x + Math.cos(playerShotAng+.2) * power,y:pt0.y + Math.sin(playerShotAng+.2) * power};
+	//draw triangle
+	ctx.fillStyle = '#00FF00';
+	ctx.beginPath();
+	ctx.moveTo(pt0.x,pt0.y);
+    ctx.lineTo(pt1.x,pt1.y);
+    ctx.lineTo(pt2.x,pt2.y);
+    ctx.fill();
+}
+
+/**
  * draw a meter indicating remaining fuel
  */
  function drawFuel() {
  	ctx.font = "12px Arial";
-	ctx.fillStyle = "white"
+	ctx.fillStyle = "white";
 	ctx.fillText("Fuel",20,20);
  	ctx.fillStyle = "red";
  	ctx.fillRect(20,30,100,20);
- 	ctx.fillStyle = "green";
+ 	ctx.fillStyle = "#BBFF00";
  	ctx.fillRect(20,30,100 * (fuel/maxFuel),20);
  }
 
@@ -196,14 +239,12 @@ function update() {
 	
 	if (gameMode == gameModes.play) {
 		updatePlayer();
+		updateBullets();
 	}
 	else {
 		//if we are not in play mode, still update the player's gun, but don't allow angle changes
 		updateGun(false);
 	}
-		
-	//update objects
-	for (let i = 0; i < objects.length; objects[i].update(), ++i);
 	
 	//update GUI elements
 	for (let i = 0; i < buttons.length; buttons[i].update(), ++i);
@@ -214,6 +255,26 @@ function update() {
 	//toggle off any one-frame event indicators at the end of the update tick
 	mousePressedLeft = false;
 	mousePressedRight = false;
+}
+
+/**
+ * update all active bullets
+ */
+function updateBullets() {
+	for (let i = 0; i < bullets.length; ++i) {
+		bullets[i].x += bullets[i].xVel;
+		bullets[i].y += bullets[i].yVel;
+		//apply gravity to bullet
+		bullets[i].yVel += .3;
+		//clear bullet if it exits screen with a small buffer
+		if (bullets[i].x > cnv.width + 14 || bullets[i].x < -14 || bullets[i].y > cnv.height + 14) {
+			bullets.splice(i,1);
+			--i;		
+		}
+	}
+	if (bullets.length == 0 && numShots == 0) {
+		toggleGameMode();
+	}
 }
 
 /**
@@ -232,8 +293,34 @@ function updatePlayer() {
 		}
 	}
 	//aiming
-	//calculate gun start pos 
 	updateGun();
+	
+	//firing
+	if (mousePressedLeft && numShots > 0 && pointInRect(cnv.mousePos.x,cnv.mousePos.y,cnv)) {
+		choosingPower = true;
+		powerSin = 1;
+		power = 0;
+	}
+	if (mouseDownLeft) {
+		power += powerSin;
+		if (power%100 == 0) {
+			powerSin *= -1;
+		}
+	}
+	else {
+		if (choosingPower) {
+			choosingPower = false;
+			fireShot();
+		}
+	}
+}
+
+/**
+ * fire a bullet from the player tank's gun
+ */
+function fireShot() {
+	bullets.push({x:gunFinalPos.x,y:gunFinalPos.y,xVel:Math.cos(playerShotAng)*(power*.25),yVel:Math.sin(playerShotAng)*(power*.25)});
+	--numShots;
 }
 
 /**
@@ -241,6 +328,7 @@ function updatePlayer() {
  * @param shouldUpdateAngle: whether or not we should allow the gun angle to change
  */
 function updateGun(shouldUpdateAngle = true) {
+	//calculate gun start pos
 	gunStartPos.x = playerPos.x + Math.cos(-Math.PI/2 + playerRot) * 6;
 	gunStartPos.y = playerPos.y + (playerRad/2) + Math.sin(-Math.PI/2 + playerRot) * 6;
     if (shouldUpdateAngle) {
@@ -290,7 +378,7 @@ function randomizeTerrain() {
 	terrainVerts.length = 0;
 	for (let i = 0; i < numTerrainVerts; ++i) {
 		terrainVerts.push({x: cnv.width * (i/(numTerrainVerts-1)), 
-		y:clamp(i == 0 ? getRandomInt(minTerrainStartY,cnv.height - minTerrainStartY - 1) : 
+		y:clamp(i == 0 ? getRandomInt(minTerrainStartY,cnv.height - minTerrainStartY - 1) + 100 : 
 		terrainVerts[i-1].y + getRandomInt(-5,6),minTerrainY, cnv.height-minTerrainY - 1)});
 	}
 	calcPlayerPosRot(playerPos.x);
@@ -395,6 +483,7 @@ function updatePlacer() {
  * toggle between play and build modes
  */
 function toggleGameMode() {
+	bullets.length = 0;
 	stopPlacer();
 	gameMode = (gameMode == gameModes.build ? gameModes.play : gameModes.build);
 	playerPos = playerStartPos;
@@ -404,6 +493,7 @@ function toggleGameMode() {
 	//toggle active flag on settings buttons when starting/stopping the game
 	for (let i = 0; i < 5; buttons[i].active = !buttons[i].active, ++i);
 	buttons[5].text = (gameMode == gameModes.build ? "play" : "stop");
+	choosingPower = false;
 }
 
 /**
@@ -418,8 +508,7 @@ function initGlobals() {
 	deltaTime = 0;
 	totalTime = 0;
 	
-	//global game objects
-	objects = [];
+	bullets = [];
 	
 	//game modes
 	gameModes = new Enum("build","play");
@@ -447,6 +536,9 @@ function initGlobals() {
 	numShots = maxNumShots;
 	maxFuel = 100;
 	fuel = maxFuel;
+	choosingPower = false;
+	powerSin = 1;
+	power = 0;
 	
 	//terrain
 	terrainVerts = [];
