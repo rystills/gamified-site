@@ -49,7 +49,7 @@ function render() {
 function drawBullets() {
 	for (let i = 0; i < bullets.length; ++i) {
 		ctx.beginPath();
-		ctx.arc(bullets[i].x,bullets[i].y,4,0,2*Math.PI);
+		ctx.arc(bullets[i].x,bullets[i].y,bulletRadius,0,2*Math.PI);
 		ctx.closePath();
 		ctx.lineWidth = 1;
 		ctx.fillStyle = 'white';
@@ -94,7 +94,7 @@ function drawPowerBar() {
  	ctx.font = "12px Arial";
 	ctx.fillStyle = "white";
 	ctx.fillText("Fuel",20,20);
- 	ctx.fillStyle = "red";
+ 	ctx.fillStyle = "#CC4400";
  	ctx.fillRect(20,30,100,20);
  	ctx.fillStyle = "#BBFF00";
  	ctx.fillRect(20,30,100 * (fuel/maxFuel),20);
@@ -157,7 +157,9 @@ function drawWalls() {
  */
 function drawTargets() {
 	for (let i = 0; i < targetLocs.length; ++i) {
-		drawCentered("target",ctx, targetLocs[i].x,targetLocs[i].y);
+		if (targetLocs[i].alive) {
+			drawCentered("target",ctx, targetLocs[i].x,targetLocs[i].y);
+		}
 	}
 }
 
@@ -262,18 +264,75 @@ function update() {
  */
 function updateBullets() {
 	for (let i = 0; i < bullets.length; ++i) {
-		bullets[i].x += bullets[i].xVel;
-		bullets[i].y += bullets[i].yVel;
-		//apply gravity to bullet
-		bullets[i].yVel += .3;
-		//clear bullet if it exits screen with a small buffer
-		if (bullets[i].x > cnv.width + 14 || bullets[i].x < -14 || bullets[i].y > cnv.height + 14) {
-			bullets.splice(i,1);
-			--i;		
+		//divide movement into 10 sub-steps to minimize risk of passing through collisions
+		for (let j = 0; j < 10; ++j) {
+			bullets[i].x += bullets[i].xVel/10;
+			bullets[i].y += bullets[i].yVel/10;
+			//apply gravity to bullet
+			bullets[i].yVel += .3/10;
+			//clear bullet if it exits screen with a small buffer
+			if (bullets[i].x > cnv.width + 14 || bullets[i].x < -14 || bullets[i].y > cnv.height + 14) {
+				bullets.splice(i,1);
+				--i;	
+				break;	
+			}
+			//check collisions with targets
+			for (let r = 0; r < targetLocs.length; ++r) {
+				if (!targetLocs[r].alive) {
+					continue;
+				}
+				if (getDistance(bullets[i].x,bullets[i].y,targetLocs[r].x,targetLocs[r].y) < bulletRadius + targetRadius) {
+					targetLocs[r].alive = false;
+					--r;
+				}
+			}
+			//check collisions with walls
+			for (let r = 0; r < wallVerts.length; r+=2) {
+				if (collisionCircleLine(bulletRadius,bullets[i],wallWidth,wallVerts[r],wallVerts[r+1])) {
+				
+					//calculate bounce angle
+					let bulletDir = getAngle(bullets[i].x,bullets[i].y,bullets[i].x + bullets[i].xVel, bullets[i].y + bullets[i].yVel,true);
+					let bulletSpeed = getDistance(bullets[i].x,bullets[i].y,bullets[i].x + bullets[i].xVel, bullets[i].y + bullets[i].yVel);
+					let wallDir = getAngle(wallVerts[r].x,wallVerts[r].y,wallVerts[r+1].x,wallVerts[r+1].y,true);					
+					//rotate coordinate system
+					bulletDir -= wallDir;
+					//bounce
+					let bounceXVel = Math.cos(bulletDir) * bulletSpeed;
+					let bounceYVel = Math.sin(bulletDir) * bulletSpeed * -1;
+					//rotate coordinate system back
+					let bounceBulletDir = getAngle(bullets[i].x,bullets[i].y,bullets[i].x + bounceXVel, bullets[i].y + bounceYVel,true);
+					bounceBulletDir += wallDir
+					//return to velocities
+					bullets[i].xVel = Math.cos(bounceBulletDir) * bulletSpeed;
+					bullets[i].yVel = Math.sin(bounceBulletDir) * bulletSpeed;
+					
+					//push the ball out of the collision before continuing
+					while (collisionCircleLine(bulletRadius,bullets[i],wallWidth,wallVerts[r],wallVerts[r+1])) {
+						bullets[i].x += bullets[i].xVel/100;
+						bullets[i].y += bullets[i].yVel/100;
+					}
+				}
+			}
 		}
 	}
+	
+	//end game is all targets have been cleared
+	let allClear = true;
+	for (let i = 0; i < targetLocs.length; ++i) {
+		if (targetLocs[i].alive) {
+			allClear = false;
+			break;
+		}
+	}
+	if (allClear) {
+		toggleGameMode();
+		return;
+	}
+	
+	//end game if player is out of shots and no bullets are left alive
 	if (bullets.length == 0 && numShots == 0) {
 		toggleGameMode();
+		return;
 	}
 }
 
@@ -470,7 +529,7 @@ function updatePlacer() {
 				wallVerts.push(cnv.mousePos);
 			}
 			else if (placeType == placeTypes.target) {
-				targetLocs.push(cnv.mousePos);
+				targetLocs.push({"x":cnv.mousePos.x,"y":cnv.mousePos.y,"alive":true});
 			}
 			else if (placeType == placeTypes.player) {
 				stopPlacer();
@@ -483,8 +542,15 @@ function updatePlacer() {
  * toggle between play and build modes
  */
 function toggleGameMode() {
-	bullets.length = 0;
+	//reset targets
+	if (gameMode == gameModes.play) {
+		for (let i = 0; i < targetLocs.length; ++i) {
+			targetLocs[i].alive = true;
+		}
+	}
+	
 	stopPlacer();
+	bullets.length = 0;
 	gameMode = (gameMode == gameModes.build ? gameModes.play : gameModes.build);
 	playerPos = playerStartPos;
 	numShots = maxNumShots;
@@ -553,6 +619,9 @@ function initGlobals() {
 	wallWidth = 4;
 	eraserRadius = 16;
 	targetRadius = 16;
+	
+	//bullets
+	bulletRadius = 4;
 	
 	//global list of UI buttons
 	buttons = [];
