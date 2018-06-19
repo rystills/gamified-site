@@ -48,6 +48,9 @@ function render() {
  * draw a meter indicating remaining fuel
  */
  function drawFuel() {
+ 	ctx.font = "12px Arial";
+	ctx.fillStyle = "white"
+	ctx.fillText("Fuel",20,20);
  	ctx.fillStyle = "red";
  	ctx.fillRect(20,30,100,20);
  	ctx.fillStyle = "green";
@@ -81,14 +84,8 @@ function render() {
 	ctx.lineWidth = playerGunWidth;
 	ctx.strokeStyle = '#8B0000';
 	ctx.beginPath();
-	//calculate gun start pos 
-	let gunStartX = playerPos.x + Math.cos(-Math.PI/2 + playerRot) * 6;
-	let gunStartY = playerPos.y + (playerRad/2) + Math.sin(-Math.PI/2 + playerRot) * 6;
-    ctx.moveTo(gunStartX,gunStartY);
-    //calculate gun end pos
-    let gunFinalX = gunStartX + Math.cos(playerShotAng) * playerGunLength;
-    let gunFinalY = gunStartY + Math.sin(playerShotAng) * playerGunLength;
-    ctx.lineTo(gunFinalX,gunFinalY);
+	ctx.moveTo(gunStartPos.x,gunStartPos.y);
+    ctx.lineTo(gunFinalPos.x,gunFinalPos.y);
     ctx.stroke();
  }
 
@@ -200,6 +197,10 @@ function update() {
 	if (gameMode == gameModes.play) {
 		updatePlayer();
 	}
+	else {
+		//if we are not in play mode, still update the player's gun, but don't allow angle changes
+		updateGun(false);
+	}
 		
 	//update objects
 	for (let i = 0; i < objects.length; objects[i].update(), ++i);
@@ -219,6 +220,7 @@ function update() {
  * update the player tank during play mode
  */
 function updatePlayer() {
+	//movement
 	if (fuel > 0) {
 		if (keyStates["A"] && playerPos.x > minPlayerPos) {
 			calcPlayerPosRot(playerPos.x-1, false);
@@ -229,6 +231,24 @@ function updatePlayer() {
 			--fuel;
 		}
 	}
+	//aiming
+	//calculate gun start pos 
+	updateGun();
+}
+
+/**
+ * update the player's gun angle and recalculate start/end position of the gun
+ * @param shouldUpdateAngle: whether or not we should allow the gun angle to change
+ */
+function updateGun(shouldUpdateAngle = true) {
+	gunStartPos.x = playerPos.x + Math.cos(-Math.PI/2 + playerRot) * 6;
+	gunStartPos.y = playerPos.y + (playerRad/2) + Math.sin(-Math.PI/2 + playerRot) * 6;
+    if (shouldUpdateAngle) {
+    	playerShotAng = getAngle(gunStartPos.x,gunStartPos.y,cnv.mousePos.x,cnv.mousePos.y,true);
+    }
+    //calculate gun end pos
+    gunFinalPos.x = gunStartPos.x + Math.cos(playerShotAng) * playerGunLength;
+    gunFinalPos.y = gunStartPos.y + Math.sin(playerShotAng) * playerGunLength;
 }
 
 /**
@@ -375,10 +395,12 @@ function updatePlacer() {
  * toggle between play and build modes
  */
 function toggleGameMode() {
+	stopPlacer();
 	gameMode = (gameMode == gameModes.build ? gameModes.play : gameModes.build);
 	playerPos = playerStartPos;
 	numShots = maxNumShots;
 	fuel = maxFuel;
+	playerShotAng = -Math.PI/8;
 	//toggle active flag on settings buttons when starting/stopping the game
 	for (let i = 0; i < 5; buttons[i].active = !buttons[i].active, ++i);
 	buttons[5].text = (gameMode == gameModes.build ? "play" : "stop");
@@ -417,6 +439,8 @@ function initGlobals() {
 	playerStartPos = {x:100,y:0};
 	playerPos = playerStartPos;
 	playerShotAng = -Math.PI/8;
+	gunStartPos = {x:0,y:0};
+	gunFinalPos = {x:0,y:0};
 	
 	//settings
 	maxNumShots = 3;
