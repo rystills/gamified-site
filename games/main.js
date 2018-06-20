@@ -264,12 +264,12 @@ function update() {
  */
 function updateBullets() {
 	for (let i = 0; i < bullets.length; ++i) {
-		//divide movement into 10 sub-steps to minimize risk of passing through collisions
-		for (let j = 0; j < 10; ++j) {
-			bullets[i].x += bullets[i].xVel/10;
-			bullets[i].y += bullets[i].yVel/10;
+		//divide movement into 15 sub-steps to minimize risk of passing through collisions
+		for (let j = 0; j < 15; ++j) {
+			bullets[i].x += bullets[i].xVel/15;
+			bullets[i].y += bullets[i].yVel/15;
 			//apply gravity to bullet
-			bullets[i].yVel += .3/10;
+			bullets[i].yVel += .3/15;
 			//clear bullet if it exits screen with a small buffer
 			if (bullets[i].x > cnv.width + 14 || bullets[i].x < -14 || bullets[i].y > cnv.height + 14) {
 				bullets.splice(i,1);
@@ -289,7 +289,6 @@ function updateBullets() {
 			//check collisions with walls
 			for (let r = 0; r < wallVerts.length; r+=2) {
 				if (collisionCircleLine(bulletRadius,bullets[i],wallWidth,wallVerts[r],wallVerts[r+1])) {
-				
 					//calculate bounce angle
 					let bulletDir = getAngle(bullets[i].x,bullets[i].y,bullets[i].x + bullets[i].xVel, bullets[i].y + bullets[i].yVel,true);
 					let bulletSpeed = getDistance(bullets[i].x,bullets[i].y,bullets[i].x + bullets[i].xVel, bullets[i].y + bullets[i].yVel);
@@ -311,6 +310,15 @@ function updateBullets() {
 						bullets[i].x += bullets[i].xVel/100;
 						bullets[i].y += bullets[i].yVel/100;
 					}
+				}
+			}
+			//check collisions with terrain
+			for (let r = 0; r < terrainVerts.length; ++r) {
+				if (getDistance(bullets[i].x,bullets[i].y,terrainVerts[r].x,terrainVerts[r].y) < bulletRadius) {
+					bullets.splice(i,1);
+					--i;
+					j = 15;
+					break;
 				}
 			}
 		}
