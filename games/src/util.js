@@ -203,7 +203,7 @@ function collisionCircleLine(circRad, circPos, lineWidth, lineSPos, lineEPos) {
  */
 function pointLineSegmentDistance(v, w, p) {
 	l2 = Math.pow(v.x - w.x, 2) + Math.pow(v.y - w.y, 2);
-	if (l2 == 0.0) return distance(p.x, p.y, v.x, v.y); 
+	if (l2 == 0.0) return getDistance(p.x, p.y, v.x, v.y); 
 	pminusv = {x:p.x-v.x, y:p.y-v.y};
 	wminusv = {x:w.x-v.x, y:w.y-v.y};
 	t = Math.max(0, Math.min(1, (pminusv.x*wminusv.x + pminusv.y*wminusv.y) / l2));

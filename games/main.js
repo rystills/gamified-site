@@ -39,9 +39,38 @@ function render() {
 	drawAmmo();
 	drawFuel();
 	
+	if (gameWon) {
+		drawWinText();
+	}
+	else if (gameLost) {
+		drawLoseText();
+	}
+	
 	//finally draw the HUD
 	drawHUD();
 }
+
+/**
+ * draw victory text
+ */
+function drawWinText() {
+	ctx.font = "36px Arial";
+	ctx.fillStyle = "white";
+	ctx.textAlign="center";
+	ctx.fillText("You Win!",cnv.width/2,cnv.height/2);
+	ctx.textAlign="start";
+}
+
+/** 
+ * draw losing text
+ */
+ function drawLoseText() {
+	 ctx.font = "36px Arial";
+	ctx.fillStyle = "white";
+	ctx.textAlign="center";
+	ctx.fillText("You Lose!",cnv.width/2,cnv.height/2);
+	ctx.textAlign="start";
+ }
 
 /**
  * draw all bullets in order
@@ -239,7 +268,7 @@ function update() {
 	
 	updatePlacer();
 	
-	if (gameMode == gameModes.play) {
+	if (gameMode == gameModes.play && !(gameWon || gameLost)) {
 		updatePlayer();
 		updateBullets();
 	}
@@ -333,13 +362,13 @@ function updateBullets() {
 		}
 	}
 	if (allClear) {
-		toggleGameMode();
-		return;
+		gameWon = true;
+		buttons[6].active = true;
 	}
 	
 	//end game if player is out of shots and no bullets are left alive
 	if (bullets.length == 0 && numShots == 0) {
-		toggleGameMode();
+		gameLost = true;
 		return;
 	}
 }
@@ -556,7 +585,9 @@ function toggleGameMode() {
 			targetLocs[i].alive = true;
 		}
 	}
-	
+	gameWon = false;
+	buttons[6].active = false;
+	gameLost = false;
 	stopPlacer();
 	bullets.length = 0;
 	gameMode = (gameMode == gameModes.build ? gameModes.play : gameModes.build);
@@ -568,6 +599,13 @@ function toggleGameMode() {
 	for (let i = 0; i < 5; buttons[i].active = !buttons[i].active, ++i);
 	buttons[5].text = (gameMode == gameModes.build ? "play" : "stop");
 	choosingPower = false;
+}
+
+/**
+ * publish the current level to the online database
+ */
+function publishLevel() {
+	console.log(JSON.stringify(terrainVerts));
 }
 
 /**
@@ -613,10 +651,12 @@ function initGlobals() {
 	choosingPower = false;
 	powerSin = 1;
 	power = 0;
+	gameWon = false;
+	gameLost = false;
 	
 	//terrain
 	terrainVerts = [];
-	numTerrainVerts = 400;
+	numTerrainVerts = 100;
 	minTerrainY = 50;
 	minTerrainStartY = 200;
 	randomizeTerrain();
@@ -639,6 +679,8 @@ function initGlobals() {
 	buttons.push(new Button(10,160,uicnv,"Place Player",24,startPlacer,placeTypes.player));
 	buttons.push(new Button(10,210,uicnv,"Eraser",24,startPlacer,placeTypes.eraser));
 	buttons.push(new Button(10,260,uicnv,"Play",24,toggleGameMode));
+	buttons.push(new Button(10,310,uicnv,"Publish Level",24,publishLevel));
+	buttons[6].active = false;
 	
 	//gradients
 	skyGradient = ctx.createRadialGradient(850,500,1,500,600,900);
