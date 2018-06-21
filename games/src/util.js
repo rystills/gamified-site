@@ -161,6 +161,28 @@ function collisionRect(a,b) {
 }
 
 /**
+ * publish the current level to the server
+ * @param gameName: the name of the game for which the level was constructed
+ * @param lname: the level name
+ * @param ldata: the JSON level data
+ */
+function publishLevelToServer(gameName,lname,ldata) {
+	$.ajax({
+		type: "POST",
+		url: '../../../../../backend/publishLevel.php',
+		data: {game_name:gameName, level_name: lname, level_data: ldata},
+		success: function(data){
+			if (data == "Success") {
+				alert("Level Published Successfully!");
+			}
+			else {
+				alert(data);
+			}
+		}
+	});
+}
+
+/**
  * check for a collision between a point and a rect
  * @param px: the x coordinate of our point
  * @param py: the y coordinate of our point

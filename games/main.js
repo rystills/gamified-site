@@ -473,7 +473,7 @@ function loadAssets() {
 function randomizeTerrain() {
 	terrainVerts.length = 0;
 	for (let i = 0; i < numTerrainVerts; ++i) {
-		terrainVerts.push({x: cnv.width * (i/(numTerrainVerts-1)), 
+		terrainVerts.push({x: Math.round(cnv.width * (i/(numTerrainVerts-1))), 
 		y:clamp(i == 0 ? getRandomInt(minTerrainStartY,cnv.height - minTerrainStartY - 1) + 100 : 
 		terrainVerts[i-1].y + getRandomInt(-5,6),minTerrainY, cnv.height-minTerrainY - 1)});
 	}
@@ -605,7 +605,20 @@ function toggleGameMode() {
  * publish the current level to the online database
  */
 function publishLevel() {
-	console.log(JSON.stringify(terrainVerts));
+	levelName = "";
+	while (levelName.length == 0) {
+		levelName = prompt("Enter Level Name", "Untitled").trim();
+	}
+	//limit level name to 50 characters
+	levelName = levelName.length > 50 ? levelName.substring(0,50) : levelName;
+	//stringify the level data, delimited with newlines so we can easily split and destringify later to load
+	levelData = JSON.stringify(terrainVerts) + '\n' 
+	+ JSON.stringify(targetLocs) + '\n' 
+	+ JSON.stringify(wallVerts) + '\n'
+	+ JSON.stringify(playerStartPos) + '\n'
+	+ JSON.stringify(maxNumShots) + '\n'
+	+ JSON.stringify(maxFuel);
+	publishLevelToServer("targetTest",levelName,levelData);
 }
 
 /**
@@ -653,10 +666,11 @@ function initGlobals() {
 	power = 0;
 	gameWon = false;
 	gameLost = false;
+	levelName = "";
 	
 	//terrain
 	terrainVerts = [];
-	numTerrainVerts = 100;
+	numTerrainVerts = 101;
 	minTerrainY = 50;
 	minTerrainStartY = 200;
 	randomizeTerrain();

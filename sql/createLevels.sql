@@ -1,0 +1,8 @@
+CREATE TABLE levels (
+    id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    creator VARCHAR(50) NOT NULL,
+    level_name VARCHAR(50) NOT NULL,
+    game_type VARCHAR(50) NOT NULL,
+    content TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
