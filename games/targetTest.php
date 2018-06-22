@@ -1,3 +1,7 @@
+<?php
+include($_SERVER["DOCUMENT_ROOT"] . '/backend/session.php');
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 	<head>

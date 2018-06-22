@@ -28,7 +28,7 @@
           <h2 class="form-signin-heading">Current Score: <?php echo $_SESSION['score'];?></h2>
           <div class="etc-login-form">
       <p>Not you? <a onClick="logout();" style="cursor: pointer; cursor: hand;">Click here to log out</a></p>
-          <button class="btn btn-lg btn-primary btn-block" type="button" onclick="window.location.href='../../games/targetTest.html'">Play Target Test</button>
+          <button class="btn btn-lg btn-primary btn-block" type="button" onclick="window.location.href='../../games/targetTest.php'">Play Target Test</button>
     </div>
         </form>
       </div>
