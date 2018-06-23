@@ -6,3 +6,4 @@ todo:
 -salt + hash passwords  
 -move backend files outside of document root to prevent unauthorized access  
 -send inputs for serverside level validation on submission  
+-move level listing to frontend with data passed from backend query, rather than loading the backend file directly
