@@ -5,7 +5,7 @@ $query = "SELECT level_name,creator,id,game_type FROM levels"; // Query to selec
 
 $result = mysqli_query($conn, $query);
 while($row = $result->fetch_assoc()) {
-    echo "<a onClick='loadLevel(".$row['id'].", ".'"'.$row['game_type'].'"'.");' style='cursor: pointer; cursor: hand;'>".$row['level_name']."<br /></a>"; // Write an anchor with the url as href, and text as value/content
+    echo "<a onClick='loadLevel(".$row['id'].", ".'"'.$row['game_type'].'"'.");' style='cursor: pointer; cursor: hand;'>".$row['level_name']."- created by ".$row['creator']."<br /></a>"; // Write an anchor with the url as href, and text as value/content
     //echo "<a href='asdf'>".$row['level_name']." - created by ".$row['creator']."<br /></a>"; // Write an anchor with the url as href, and text as value/content
 }
 

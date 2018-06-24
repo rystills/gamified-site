@@ -20,6 +20,10 @@ function clearScreen() {
 function render() {
 	//clear all canvases for a fresh render
 	clearScreen();
+	if (loading) {
+		drawLoadingText();
+		return;
+	}
 	
 	drawTerrain();
 	drawWalls();
@@ -48,6 +52,17 @@ function render() {
 	
 	//finally draw the HUD
 	drawHUD();
+}
+
+/**
+ * draw loading screen text
+ */
+function drawLoadingText() {
+	ctx.font = "36px Arial";
+	ctx.fillStyle = "white";
+	ctx.textAlign="center";
+	ctx.fillText("Loading...",cnv.width/2,cnv.height/2);
+	ctx.textAlign="start";
 }
 
 /**
@@ -265,6 +280,11 @@ function drawHUD() {
 function update() {
 	//update the deltaTime
 	updateTime();
+	
+	if (loading) {
+		render();
+		return;
+	}
 	
 	updatePlacer();
 	
@@ -622,6 +642,27 @@ function publishLevel() {
 }
 
 /**
+ * load level from the input JSON data
+ * @param JSONData: the data comprising the level to load
+ */
+function loadLevel(JSONData) {
+	splitData = JSONData.split('\n');
+	terrainVerts.length = 0;
+	terrainVerts = JSON.parse(splitData[0]);
+	targetLocs = JSON.parse(splitData[1]);
+	wallVerts = JSON.parse(splitData[2]);
+	playerStartPos = JSON.parse(splitData[3]);
+	calcPlayerPosRot(playerStartPos.x);
+	maxNumShots = JSON.parse(splitData[4]);
+	maxFuel = JSON.parse(splitData[5]);
+	//set targets alive to true
+	for (let i = 0; i < targetLocs.length; ++i) {
+		targetLocs[i].alive = true;
+	}
+	loading = false;
+}
+
+/**
  * initialize all global variables
  */
 function initGlobals() {
@@ -704,6 +745,13 @@ function initGlobals() {
 	groundGradient = ctx.createLinearGradient(cnv.width,0,0,cnv.height);
 	groundGradient.addColorStop(0,"#ff59b2");
 	groundGradient.addColorStop(1,"#387517");
+
+	loading = false;
+	levelId = getURLParams().levelId;
+	if (levelId != null) {
+		loading = true;
+		getLevelData(levelId);
+	}
 }
 
 //disallow right-click context menu as right click functionality is often necessary for gameplay

@@ -183,6 +183,23 @@ function publishLevelToServer(gameName,lname,ldata) {
 }
 
 /**
+ * get the JSON data corresponding to the specified level id
+ * @param levelId: the id of the level we wish to load
+ * @returns the JSON data corresponding to the specified level id
+ */
+function getLevelData(levelId) {
+	$.ajax({
+		type: "POST",
+		url: '../../../../../backend/getLevelData.php',
+		data: {level_id: levelId},
+		success: function(data){
+			//since AJAX is async, its up to the current game to implement loadLevel and handle async on its own
+			loadLevel(data);
+		}
+	});
+}
+
+/**
  * check for a collision between a point and a rect
  * @param px: the x coordinate of our point
  * @param py: the y coordinate of our point
@@ -266,4 +283,33 @@ function startGame() {
 
 	//set the game to call the 'update' method on each tick
 	_intervalId = setInterval(update, 1000 / fps);
+}
+
+/**
+ * extract parameters from url string (sorce: https://stackoverflow.com/questions/979975/how-to-get-the-value-from-the-get-parameters')
+ * @returns an object containing keys for all url parameters
+ */
+function getURLParams() {
+	var query = window.location.search.substring(1);
+	var vars = query.split("&");
+	var query_string = {};
+	for (var i = 0; i < vars.length; i++) {
+		var pair = vars[i].split("=");
+		var key = decodeURIComponent(pair[0]);
+		var value = decodeURIComponent(pair[1]);
+		// If first entry with this name
+		if (typeof query_string[key] === "undefined") {
+			query_string[key] = decodeURIComponent(value);
+			// If second entry with this name
+		} 
+		else if (typeof query_string[key] === "string") {
+			var arr = [query_string[key], decodeURIComponent(value)];
+			query_string[key] = arr;
+			// If third or later entry with this name
+		} 
+		else {
+			query_string[key].push(decodeURIComponent(value));
+		}
+	}
+	return query_string;
 }
