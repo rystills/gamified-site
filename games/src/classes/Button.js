@@ -17,8 +17,13 @@ Button.prototype.update = function() {
 		
 		//if mouse button was just released on us, trigger a press 
 		if (!mouseDownLeft && this.pressed) {
-			//run our function, optionally passing in our argument if it has been set
-			this.function(this.arg);
+			//run our function, optionally passing in our argument if it has been set, and passing in a reference to this button as the final arg
+			if (this.arg == null) {
+				this.function(this);
+			}
+			else {
+				this.function(this.arg,this);
+			}
 		}
 
 	}

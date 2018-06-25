@@ -134,15 +134,16 @@ function drawPowerBar() {
 /**
  * draw a meter indicating remaining fuel
  */
- function drawFuel() {
- 	ctx.font = "12px Arial";
+function drawFuel() {
+	ctx.font = "12px Arial";
 	ctx.fillStyle = "white";
 	ctx.fillText("Fuel",20,20);
- 	ctx.fillStyle = "#CC4400";
- 	ctx.fillRect(20,30,100,20);
- 	ctx.fillStyle = "#BBFF00";
- 	ctx.fillRect(20,30,100 * (fuel/maxFuel),20);
- }
+	ctx.fillStyle = "#CC4400";
+	ctx.fillRect(20,30,100,20);
+	ctx.fillStyle = "#BBFF00";
+	//hardcode 100 as the base fuel tank size
+	ctx.fillRect(20,30,100 * (fuel/100),20);
+}
 
 /**
  * draw a bullet sprite for each shot available to the player
@@ -383,7 +384,7 @@ function updateBullets() {
 	}
 	if (allClear) {
 		gameWon = true;
-		buttons[6].active = true;
+		buttons[buttons.length-1].active = true;
 	}
 	
 	//end game if player is out of shots and no bullets are left alive
@@ -606,7 +607,7 @@ function toggleGameMode() {
 		}
 	}
 	gameWon = false;
-	buttons[6].active = false;
+	buttons[buttons.length-1].active = false;
 	gameLost = false;
 	stopPlacer();
 	bullets.length = 0;
@@ -616,8 +617,8 @@ function toggleGameMode() {
 	fuel = maxFuel;
 	playerShotAng = -Math.PI/8;
 	//toggle active flag on settings buttons when starting/stopping the game
-	for (let i = 0; i < 5; buttons[i].active = !buttons[i].active, ++i);
-	buttons[5].text = (gameMode == gameModes.build ? "play" : "stop");
+	for (let i = 0; i < buttons.length-2; buttons[i].active = !buttons[i].active, ++i);
+	buttons[buttons.length-2].text = (gameMode == gameModes.build ? "play" : "stop");
 	choosingPower = false;
 }
 
@@ -654,12 +655,37 @@ function loadLevel(JSONData) {
 	playerStartPos = JSON.parse(splitData[3]);
 	calcPlayerPosRot(playerStartPos.x);
 	maxNumShots = JSON.parse(splitData[4]);
+	numShots = maxNumShots;
 	maxFuel = JSON.parse(splitData[5]);
+	fuel = maxFuel;
 	//set targets alive to true
 	for (let i = 0; i < targetLocs.length; ++i) {
 		targetLocs[i].alive = true;
 	}
 	loading = false;
+}
+
+/**
+ * toggle the fuel setting
+ * @param btn: the calling button
+ */
+function toggleFuel(btn) {
+	maxFuel = (maxFuel == 100 ? 0 : (maxFuel == 0 ? 50 : 100));
+	fuel = maxFuel;
+	btn.text = "Fuel: " + maxFuel + '%';
+}
+
+/**
+ * toggle the ammo setting
+ * @param btn: the calling button
+ */
+function toggleAmmo(btn) {
+	maxNumShots+=1;
+	if (maxNumShots > 7) {
+		maxNumShots = 1;
+	}
+	numShots = maxNumShots;
+	btn.text = "Ammo: " + maxNumShots;
 }
 
 /**
@@ -733,9 +759,11 @@ function initGlobals() {
 	buttons.push(new Button(10,110,uicnv,"Place Target",24,startPlacer,placeTypes.target));
 	buttons.push(new Button(10,160,uicnv,"Place Player",24,startPlacer,placeTypes.player));
 	buttons.push(new Button(10,210,uicnv,"Eraser",24,startPlacer,placeTypes.eraser));
-	buttons.push(new Button(10,260,uicnv,"Play",24,toggleGameMode));
-	buttons.push(new Button(10,310,uicnv,"Publish Level",24,publishLevel));
-	buttons[6].active = false;
+	buttons.push(new Button(10,260,uicnv,"Fuel: 100%",24,toggleFuel));
+	buttons.push(new Button(10,310,uicnv,"Ammo: 3",24,toggleAmmo));
+	buttons.push(new Button(10,360,uicnv,"Play",24,toggleGameMode));
+	buttons.push(new Button(10,410,uicnv,"Publish Level",24,publishLevel));
+	buttons[buttons.length-1].active = false;
 	
 	//gradients
 	skyGradient = ctx.createRadialGradient(850,500,1,500,600,900);
