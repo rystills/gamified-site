@@ -22,36 +22,54 @@ function render() {
 	clearScreen();
 	if (loading) {
 		drawLoadingText();
-		return;
 	}
-	
-	drawTerrain();
-	drawWalls();
-	drawTargets();
-	drawPlayer();
-	
-	if (placing) {
-		drawPlacer();
+	else {
+		drawTerrain();
+		drawWalls();
+		drawTargets();
+		drawPlayer();
+		
+		if (placing) {
+			drawPlacer();
+		}
+		
+		if (choosingPower) {
+			drawPowerBar();
+		}
+		
+		drawBullets();
+		
+		drawAmmo();
+		drawFuel();
+		
+		if (gameWon) {
+			drawWinText();
+		}
+		else if (gameLost) {
+			drawLoseText();
+		}
+		
+		//finally draw the HUD
+		drawButtons();
+		
+		if (escapeMenuActive) {
+			darkenScreen();
+			drawButtons(menus.escape);
+		}
 	}
-	
-	if (choosingPower) {
-		drawPowerBar();
-	}
-	
-	drawBullets();
-	
-	drawAmmo();
-	drawFuel();
-	
-	if (gameWon) {
-		drawWinText();
-	}
-	else if (gameLost) {
-		drawLoseText();
-	}
-	
-	//finally draw the HUD
-	drawHUD();
+	//toggle off any one-frame event indicators at the end of the update tick
+	mousePressedLeft = false;
+	mousePressedRight = false;
+}
+
+/** 
+ * darken the screen with a partial transparency black fill
+ */
+function darkenScreen() {
+	ctx.fillStyle = "rgba(0,0,0,.7)";
+	ctx.fillRect(0,0,cnv.width,cnv.height);
+	uictx.fillStyle = "rgba(0,0,0,.7)";
+	uictx.fillRect(0,0,uicnv.width,uicnv.height);
 }
 
 /**
@@ -246,30 +264,34 @@ function drawTerrain() {
 /**
  * draw the HUD
  */
-function drawHUD() {
+function drawButtons(menu=null) {
+	let buttonList = buttons;
+	if (menu == menus.escape) {
+		buttonList = escapeButtons;
+	}
 	//draw buttons
-	for (let i = 0; i < buttons.length; ++i) {
-		let btnctx = buttons[i].canvas.getContext("2d");
+	for (let i = 0; i < buttonList.length; ++i) {
+		let btnctx = buttonList[i].canvas.getContext("2d");
 		//fill light blue border color
 		btnctx.fillStyle = "rgb(" +  
-		Math.round(.15 * buttons[i].blendWhiteness) + ", " + 
-		Math.round(buttons[i].blendWhiteness *.75) + ", " + 
-		Math.round(.1 * buttons[i].blendWhiteness) + ")";
-		btnctx.fillRect(buttons[i].x, buttons[i].y, buttons[i].width,buttons[i].height);
+		Math.round(.15 * buttonList[i].blendWhiteness) + ", " + 
+		Math.round(buttonList[i].blendWhiteness *.75) + ", " + 
+		Math.round(.1 * buttonList[i].blendWhiteness) + ")";
+		btnctx.fillRect(buttonList[i].x, buttonList[i].y, buttonList[i].width,buttonList[i].height);
 		
 		//fill blue inner color
 		btnctx.fillStyle = "rgb(" + 
-		Math.round(buttons[i].blendWhiteness *.1) + ", " + 
-		Math.round(.15 * buttons[i].blendWhiteness) + ", " + 
-		Math.round(.75 * buttons[i].blendWhiteness) + ")";
-		btnctx.fillRect(buttons[i].x + 2, buttons[i].y + 2, buttons[i].width - 4,buttons[i].height - 4);
+		Math.round(buttonList[i].blendWhiteness *.1) + ", " + 
+		Math.round(.15 * buttonList[i].blendWhiteness) + ", " + 
+		Math.round(.75 * buttonList[i].blendWhiteness) + ")";
+		btnctx.fillRect(buttonList[i].x + 2, buttonList[i].y + 2, buttonList[i].width - 4,buttonList[i].height - 4);
 		
 		//set the font size and color depending on the button's attributes and state
-		btnctx.font = buttons[i].fontSize + "px Arial";
-		btnctx.fillStyle = "rgb(" + buttons[i].blendWhiteness + ", " + buttons[i].blendWhiteness + ", " + buttons[i].blendWhiteness + ")";
+		btnctx.font = buttonList[i].fontSize + "px Arial";
+		btnctx.fillStyle = "rgb(" + buttonList[i].blendWhiteness + ", " + buttonList[i].blendWhiteness + ", " + buttonList[i].blendWhiteness + ")";
 		
 		//draw the button label (add slight position offset to account for line spacing)
-		btnctx.fillText(buttons[i].text,buttons[i].x + 4, buttons[i].y + buttons[i].height/2 + 8);
+		btnctx.fillText(buttonList[i].text,buttonList[i].x + 4, buttonList[i].y + buttonList[i].height/2 + 8);
 	}
 	uictx.font = "24px Arial";
 	uictx.fillStyle = "#FFFFFF";
@@ -281,8 +303,21 @@ function drawHUD() {
 function update() {
 	//update the deltaTime
 	updateTime();
-	
-	if (loading) {
+	//toggle escape menu on escape key press
+	if (keyStates[""]) {
+		if (!escapePressed) {
+			escapePressed = true;
+			toggleEscapeMenu();
+		}
+	}
+	else {
+		escapePressed = false;
+	}
+	//special mini-update and render when loading or escape menu is open
+	if (escapeMenuActive || loading) {
+		if (escapeMenuActive) {
+			for (let i = 0; i < escapeButtons.length; escapeButtons[i].update(), ++i);
+		}
 		render();
 		return;
 	}
@@ -303,12 +338,21 @@ function update() {
 	
 	//once all updates are out of the way, render the frame
 	render();
-	
-	//toggle off any one-frame event indicators at the end of the update tick
-	mousePressedLeft = false;
-	mousePressedRight = false;
 }
 
+/**
+ * toggle the escape menu on / off
+ */
+function toggleEscapeMenu() {
+	escapeMenuActive = !escapeMenuActive;
+}
+
+/**
+ * return to the main menu
+ */
+function returnToMainMenu() {
+	menu = menus.main;
+}
 /**
  * update all active bullets
  */
@@ -402,11 +446,11 @@ function updatePlayer() {
 	if (fuel > 0) {
 		if (keyStates["A"] && playerPos.x > minPlayerPos) {
 			calcPlayerPosRot(playerPos.x-1, false);
-			--fuel;
+			fuel-=.4;
 		}
 		else if (keyStates["D"] && playerPos.x < cnv.width - minPlayerPos) {
 			calcPlayerPosRot(playerPos.x+1, false);
-			--fuel;
+			fuel-=.4;
 		}
 	}
 	//aiming
@@ -764,16 +808,27 @@ function initGlobals() {
 	buttons.push(new Button(10,360,uicnv,"Play",24,toggleGameMode));
 	buttons.push(new Button(10,410,uicnv,"Publish Level",24,publishLevel));
 	buttons[buttons.length-1].active = false;
+
+	//buttons belonging to the escape menu
+	escapeButtons = [];
+	escapeButtons.push(new Button(300,250,cnv,"Resume Game",24,toggleEscapeMenu));
+	escapeButtons.push(new Button(300,300,cnv,"Return to Main Menu",24,returnToMainMenu));
 	
 	//gradients
 	skyGradient = ctx.createRadialGradient(850,500,1,500,600,900);
 	skyGradient.addColorStop(0,"purple");
 	skyGradient.addColorStop(1,"blue");
-	
 	groundGradient = ctx.createLinearGradient(cnv.width,0,0,cnv.height);
 	groundGradient.addColorStop(0,"#ff59b2");
 	groundGradient.addColorStop(1,"#387517");
 
+	//misc
+	menus = new Enum("main","escape","levelSelect");
+	
+	escapePressed = false;
+	escapeMenuActive = false;
+
+	//loading levels
 	loading = false;
 	levelId = getURLParams().levelId;
 	if (levelId != null) {

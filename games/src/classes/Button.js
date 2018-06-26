@@ -39,7 +39,7 @@ Button.prototype.update = function() {
 	}
 
 	//if mouse button is not held down, toggle pressed off
-	if (!(mouseDownLeft || keyStates[String.fromCharCode(13)])) {
+	if (!(mouseDownLeft)) {
 		this.pressed = false;
 	}
 
