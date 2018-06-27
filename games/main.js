@@ -90,10 +90,10 @@ function darkenScreen() {
  * draw loading screen text
  */
 function drawLoadingText() {
-	ctx.font = "36px Arial";
+	ctx.font = "48px Arial";
 	ctx.fillStyle = "white";
 	ctx.textAlign="center";
-	ctx.fillText("Loading Level",cnv.width/2,cnv.height/2);
+	ctx.fillText("Loading...",cnv.width/2,cnv.height/2);
 	ctx.textAlign="start";
 }
 
@@ -101,7 +101,7 @@ function drawLoadingText() {
  * draw victory text
  */
 function drawWinText() {
-	ctx.font = "36px Arial";
+	ctx.font = "48px Arial";
 	ctx.fillStyle = "white";
 	ctx.textAlign="center";
 	ctx.fillText("You Win!",cnv.width/2,cnv.height/2);
@@ -112,7 +112,7 @@ function drawWinText() {
  * draw losing text
  */
  function drawLoseText() {
-	ctx.font = "36px Arial";
+	ctx.font = "48px Arial";
 	ctx.fillStyle = "white";
 	ctx.textAlign="center";
 	ctx.fillText("You Lose!",cnv.width/2,cnv.height/2);
@@ -123,11 +123,17 @@ function drawWinText() {
  * draw the text that is displayed on the level select menu
  */
 function drawLevelSelectText() {
+	//title
 	ctx.font = "64px Arial";
 	ctx.fillStyle = "white";
 	ctx.textAlign="center";
 	ctx.fillText("Select a Level",cnv.width/2,cnv.height/8);
 	ctx.textAlign="start";
+	
+	//page indicator
+	uictx.font = "24px Arial";
+	uictx.fillStyle = "white";
+	uictx.fillText("Page " + (curPage+1) + "/" + numPages,10,34);
 }
 
 /**
@@ -842,11 +848,44 @@ function resetGameState() {
 	loading = false;
 }
 
+/**
+ * generate the level select screen contents from the level list string
+ * @param levelListString: a string containing newline delmimited id,name,creatorName for all levels from server
+ */
 function displayLevelList(levelListString) {
+	curPage = 0;
 	loading = false;
 	levelList = levelListString.split('\n');
-	for (let i = 0; i < levelList.length; i+=3) {
-		levelSelectButtons.push(new Button(10,100 + 50*(i/3),cnv,levelList[i+1] + " - by " + levelList[i+2],24,randomizeTerrain));
+	numPages = 1 + Math.floor((levelList.length-2) / 30);
+	levelSelectButtons.length = 3;
+	for (let i = 0; i < levelList.length-2; i+=3) {
+		levelSelectButtons.push(new Button(10,100 + 50*(i/3) + 100 * Math.floor(i/30),cnv,levelList[i+1] + " - by " + levelList[i+2],24,startLoadLevel,levelList[i].trim()));
+	}
+}
+
+/**
+ * begin loading the level with the specified id
+ * @param levelId: the id of the level to load
+ */
+function startLoadLevel(levelId) {
+	loading = true;
+	menu = null;
+	getLevelData(levelId);
+}
+
+/**
+ * change the current page of the level select menu
+ * @param increase: whether to go to the next page (true) or the previous page (false)
+ */
+function changeLevelSelectPage(increase) {
+	//first make sure there is another page available
+	if ((curPage == 0 && !increase) || (curPage == numPages-1 && increase)) {
+		return;
+	}
+	curPage += (increase ? 1 : -1);
+	//scroll all buttons by screen height to bring us to the next page
+	for (let i = 3; i < levelSelectButtons.length; ++i) {
+		levelSelectButtons[i].y += (increase ? -cnv.height : cnv.height);
 	}
 }
 
@@ -925,6 +964,9 @@ function initGlobals() {
 	
 	//buttons belonging to the level select menu
 	levelSelectButtons = [];
+	levelSelectButtons.push(new Button(10,60,uicnv,"Next Page",24,changeLevelSelectPage,true));
+	levelSelectButtons.push(new Button(10,110,uicnv,"Previous Page",24,changeLevelSelectPage,false));
+	levelSelectButtons.push(new Button(10,160,uicnv,"Return to Main Menu",24,returnToMainMenu));
 
 	//gradients
 	skyGradient = ctx.createRadialGradient(850,500,1,500,600,900);
@@ -945,14 +987,11 @@ function initGlobals() {
 	escapePressed = false;
 	escapeMenuActive = false;
 
-	resetGameState();
+	//level select vars
+	curPage = 0;
+	numPages = 0;
 
-	//loading levels
-	levelId = getURLParams().levelId;
-	if (levelId != null) {
-		loading = true;
-		getLevelData(levelId);
-	}
+	resetGameState();
 }
 
 //disallow right-click context menu as right click functionality is often necessary for gameplay
