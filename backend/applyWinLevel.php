@@ -8,6 +8,7 @@ if(!isset($_SESSION['username'])){
 
 $uname = $_SESSION['username'];
 $level_id = $_POST['level_id'];
+$creator_name = $_POST['creator_name'];
 
 $query = "SELECT score, clearedLevels FROM users WHERE username = ".'"'.$uname.'";';
 $result = mysqli_query($conn, $query);
@@ -19,6 +20,7 @@ if (in_array($level_id, $curWonLevels)) {
 	echo "Level has already been cleared; no additional points awarded";
 }
 else {
+	//this is our first time clearing this level; award points to us
 	$newWonLevelsString = $clearedLevelString . ($clearedLevelString == "" ? '' : ',') . $level_id;
 	$newScore = $row['score'] + 1;
 	$inQuery = "UPDATE users
@@ -27,7 +29,22 @@ else {
 	WHERE username = ".'"'.$uname.'";';
 	
 	if ($conn->query($inQuery) === TRUE) {
-		echo "Success";
+		//now award points to the level creator
+		$creatorQuery = "SELECT score FROM users WHERE username = ".'"'.$creator_name.'";';
+		$result = mysqli_query($conn, $creatorQuery);
+		$row = $result->fetch_assoc();
+		$creatorNewScore = $row['score'] + 1;
+		$creatorInQuery = "UPDATE users
+		SET score = ".'"'.$creatorNewScore.'"'."
+		WHERE username = ".'"'.$creator_name.'";';
+		if ($conn->query($creatorInQuery) === TRUE) {
+			echo "Success";
+		}
+		else {
+			echo "Error: user score updated successfully, but failed to update creator score";
+		}
+		
+
 	} 
 	else {
 		echo "Error: Unable to update score";

@@ -469,7 +469,7 @@ function winGame() {
 	gameWon = true;
 	buttons[buttons.length-1].active = true;
 	if (gameMode == gameModes.play) {
-		sendLevelVictory(curLevel);
+		sendLevelVictory(curLevel,curLevelCreator);
 	}
 }
 
@@ -837,16 +837,17 @@ function displayLevelList(levelListString) {
 	numPages = 1 + Math.floor((levelList.length-2) / 30);
 	levelSelectButtons.length = 3;
 	for (let i = 0; i < levelList.length-2; i+=3) {
-		levelSelectButtons.push(new Button(10,100 + 50*(i/3) + 100 * Math.floor(i/30),cnv,levelList[i+1] + " - by " + levelList[i+2],24,startLoadLevel,levelList[i].trim()));
+		levelSelectButtons.push(new Button(10,100 + 50*(i/3) + 100 * Math.floor(i/30),cnv,levelList[i+1] + " - by " + levelList[i+2],24,startLoadLevel,i));
 	}
 }
 
 /**
  * begin loading the level with the specified id
- * @param levelId: the id of the level to load
+ * @param index: the index of this level in the level list
  */
-function startLoadLevel(levelId) {
-	curLevel = levelId;
+function startLoadLevel(index) {
+	curLevel = levelList[index];
+	curLevelCreator = levelList[index+2];
 	menu = null;
 	resetGameState();
 	loading = true;
@@ -854,7 +855,7 @@ function startLoadLevel(levelId) {
 	if (buttons[buttons.length-2].text == "stop") {
 		flipButtons();
 	}
-	getLevelData(levelId);
+	getLevelData(curLevel);
 }
 
 /**
@@ -981,6 +982,8 @@ function initGlobals() {
 	curPage = 0;
 	numPages = 0;
 	curLevel = null;
+	curLevelCreator = null;
+	levelList = null;
 
 	resetGameState();
 }

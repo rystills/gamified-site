@@ -185,18 +185,18 @@ function publishLevelToServer(gameName,lname,ldata) {
 /**
  * alert the server that we won the level
  * @param levelid: the id of the level we won
+ * @param creatorName: the name of the level creator
  */
-function sendLevelVictory(levelId) {
+function sendLevelVictory(levelId,creatorName) {
 	$.ajax({
 		type: "POST",
 		url: '../../../../../backend/applyWinLevel.php',
-		data: {level_id: levelId},
+		data: {level_id: levelId, creator_name: creatorName},
 		success: function(data){
 			if (data == "Success") {
-				alert("Score Updated Successfully!");
+				alert("User and Creator Scores Updated Successfully!");
 			}
 			else {
-				console.log(data);
 				alert(data);
 			}
 		}
