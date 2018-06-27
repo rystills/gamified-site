@@ -33,6 +33,8 @@ function render() {
 			drawButtons(menus.main);
 		}
 		else if (menu == menus.levelSelect) {
+			drawLevelSelectText();
+			drawButtons(menus.levelSelect);
 		}
 		else {
 			drawTerrain();
@@ -117,13 +119,27 @@ function drawWinText() {
 	ctx.textAlign="start";
  }
 
- function drawMainMenuText() {
+ /**
+ * draw the text that is displayed on the level select menu
+ */
+function drawLevelSelectText() {
+	ctx.font = "64px Arial";
+	ctx.fillStyle = "white";
+	ctx.textAlign="center";
+	ctx.fillText("Select a Level",cnv.width/2,cnv.height/8);
+	ctx.textAlign="start";
+}
+
+/**
+ * draw the text that is displayed on the main menu
+ */
+function drawMainMenuText() {
 	ctx.font = "64px Arial";
 	ctx.fillStyle = "white";
 	ctx.textAlign="center";
 	ctx.fillText("Welcome To Target Test!",cnv.width/2,cnv.height/4);
 	ctx.textAlign="start";
- }
+}
 
 /**
  * draw all bullets in order
@@ -292,6 +308,9 @@ function drawButtons(menu=null) {
 	else if (menu == menus.main) {
 		buttonList = mainMenuButtons;
 	}
+	else if (menu == menus.levelSelect) {
+		buttonList = levelSelectButtons;
+	}
 	//draw buttons
 	for (let i = 0; i < buttonList.length; ++i) {
 		let btnctx = buttonList[i].canvas.getContext("2d");
@@ -328,6 +347,9 @@ function update() {
 	updateTime();
 	if (menu == menus.main) {
 		for (let i = 0; i < mainMenuButtons.length; mainMenuButtons[i].update(), ++i);
+	}
+	else if (menu == menus.levelSelect) {
+		for (let i = 0; i < levelSelectButtons.length; levelSelectButtons[i].update(), ++i);
 	}
 	else {
 	//toggle escape menu on escape key press
@@ -771,6 +793,15 @@ function openLevelCreator() {
 	}
 }
 
+/** 
+ * switch to the level list menu 
+ */
+function openLevelList() {
+	menu = menus.levelSelect;
+	loading = true;
+	getLevelList("targetTest");
+}
+
 /**
  * flip the state of all in-game buttons
  */
@@ -791,7 +822,8 @@ function resetGameState() {
 	playerPos = playerStartPos;
 	playerShotAng = -Math.PI/8;
 
-	maxNumShots = 3;
+	maxNumShots = 2;
+	toggleAmmo(buttons[6]);
 	numShots = maxNumShots;
 	maxFuel = 100;
 	fuel = maxFuel;
@@ -808,6 +840,14 @@ function resetGameState() {
 	escapeMenuActive = false;
 
 	loading = false;
+}
+
+function displayLevelList(levelListString) {
+	loading = false;
+	levelList = levelListString.split('\n');
+	for (let i = 0; i < levelList.length; i+=3) {
+		levelSelectButtons.push(new Button(10,100 + 50*(i/3),cnv,levelList[i+1] + " - by " + levelList[i+2],24,randomizeTerrain));
+	}
 }
 
 /**
@@ -881,8 +921,11 @@ function initGlobals() {
 	//buttons belonging to the main menu
 	mainMenuButtons = [];
 	mainMenuButtons.push(new Button(300,350,cnv,"Create a Level",24,openLevelCreator));
-	mainMenuButtons.push(new Button(300,400,cnv,"Play a User-Created Level",24,returnToMainMenu));
+	mainMenuButtons.push(new Button(300,400,cnv,"Play a User-Created Level",24,openLevelList));
 	
+	//buttons belonging to the level select menu
+	levelSelectButtons = [];
+
 	//gradients
 	skyGradient = ctx.createRadialGradient(850,500,1,500,600,900);
 	skyGradient.addColorStop(0,"purple");

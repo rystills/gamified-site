@@ -183,6 +183,22 @@ function publishLevelToServer(gameName,lname,ldata) {
 }
 
 /**
+ * retrieve a string containing all level ids, names, and creators
+ * @param gameName: the name of the game to which the levels should belong
+ */
+function getLevelList(gameName) {
+	$.ajax({
+		type: "POST",
+		url: '../../../../../backend/getLevelList.php',
+		data: {game_name: gameName},
+		success: function(data){
+			//since AJAX is async, its up to the current game to implement loadLevel and handle async on its own
+			displayLevelList(data);
+		}
+	});
+}
+
+/**
  * get the JSON data corresponding to the specified level id
  * @param levelId: the id of the level we wish to load
  * @returns the JSON data corresponding to the specified level id
