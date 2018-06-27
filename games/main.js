@@ -452,14 +452,24 @@ function updateBullets() {
 		}
 	}
 	if (allClear) {
-		gameWon = true;
-		buttons[buttons.length-1].active = true;
+		winGame();
 	}
 	
 	//end game if player is out of shots and no bullets are left alive
 	if (bullets.length == 0 && numShots == 0) {
 		gameLost = true;
 		return;
+	}
+}
+
+/**
+ * apply player win, sending result to the database if in play mode
+ */
+function winGame() {
+	gameWon = true;
+	buttons[buttons.length-1].active = true;
+	if (gameMode == gameModes.play) {
+		sendLevelVictory(curLevel);
 	}
 }
 
@@ -836,6 +846,7 @@ function displayLevelList(levelListString) {
  * @param levelId: the id of the level to load
  */
 function startLoadLevel(levelId) {
+	curLevel = levelId;
 	menu = null;
 	resetGameState();
 	loading = true;
@@ -969,6 +980,7 @@ function initGlobals() {
 	//level select vars
 	curPage = 0;
 	numPages = 0;
+	curLevel = null;
 
 	resetGameState();
 }

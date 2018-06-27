@@ -1,5 +1,10 @@
 <?php 
 require_once( $_SERVER["DOCUMENT_ROOT"] . "/backend/dbconfig.php");
+session_start();
+//redirect user to login page if they are not in an active session
+if(!isset($_SESSION['username'])){
+	header("location:login.html");   
+}
 
 $levelId = $_POST['level_id'];
 $query = "SELECT content FROM levels WHERE id = ".'"'.$levelId.'";'; // Query to get data from desired level id

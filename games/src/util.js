@@ -183,6 +183,27 @@ function publishLevelToServer(gameName,lname,ldata) {
 }
 
 /**
+ * alert the server that we won the level
+ * @param levelid: the id of the level we won
+ */
+function sendLevelVictory(levelId) {
+	$.ajax({
+		type: "POST",
+		url: '../../../../../backend/applyWinLevel.php',
+		data: {level_id: levelId},
+		success: function(data){
+			if (data == "Success") {
+				alert("Score Updated Successfully!");
+			}
+			else {
+				console.log(data);
+				alert(data);
+			}
+		}
+	});
+}
+
+/**
  * retrieve a string containing all level ids, names, and creators
  * @param gameName: the name of the game to which the levels should belong
  */
