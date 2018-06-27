@@ -3,11 +3,15 @@
  */
 function clearScreen() {
 	//main canvas
-	//clear to sky gradient
-
-	// Fill with gradient
-	ctx.fillStyle=skyGradient;
-	ctx.fillRect(0,0,cnv.width,cnv.height);
+	if (menu == menus.main || menu == menus.levelSelect) {
+		ctx.fillStyle=mainMenuGradient;
+		ctx.fillRect(0,0,cnv.width,cnv.height);
+	}
+	else {
+		//clear to sky gradient
+		ctx.fillStyle=skyGradient;
+		ctx.fillRect(0,0,cnv.width,cnv.height);
+	}
 	
 	//HUD canvas
 	uictx.fillStyle="rgb(0,0,0)";
@@ -24,37 +28,45 @@ function render() {
 		drawLoadingText();
 	}
 	else {
-		drawTerrain();
-		drawWalls();
-		drawTargets();
-		drawPlayer();
-		
-		if (placing) {
-			drawPlacer();
+		if (menu == menus.main) {
+			drawMainMenuText();
+			drawButtons(menus.main);
 		}
-		
-		if (choosingPower) {
-			drawPowerBar();
+		else if (menu == menus.levelSelect) {
 		}
-		
-		drawBullets();
-		
-		drawAmmo();
-		drawFuel();
-		
-		if (gameWon) {
-			drawWinText();
-		}
-		else if (gameLost) {
-			drawLoseText();
-		}
-		
-		//finally draw the HUD
-		drawButtons();
-		
-		if (escapeMenuActive) {
-			darkenScreen();
-			drawButtons(menus.escape);
+		else {
+			drawTerrain();
+			drawWalls();
+			drawTargets();
+			drawPlayer();
+			
+			if (placing) {
+				drawPlacer();
+			}
+			
+			if (choosingPower) {
+				drawPowerBar();
+			}
+			
+			drawBullets();
+			
+			drawAmmo();
+			drawFuel();
+			
+			if (gameWon) {
+				drawWinText();
+			}
+			else if (gameLost) {
+				drawLoseText();
+			}
+			
+			//finally draw the HUD
+			drawButtons();
+			
+			if (escapeMenuActive) {
+				darkenScreen();
+				drawButtons(menus.escape);
+			}
 		}
 	}
 	//toggle off any one-frame event indicators at the end of the update tick
@@ -79,7 +91,7 @@ function drawLoadingText() {
 	ctx.font = "36px Arial";
 	ctx.fillStyle = "white";
 	ctx.textAlign="center";
-	ctx.fillText("Loading...",cnv.width/2,cnv.height/2);
+	ctx.fillText("Loading Level",cnv.width/2,cnv.height/2);
 	ctx.textAlign="start";
 }
 
@@ -98,10 +110,18 @@ function drawWinText() {
  * draw losing text
  */
  function drawLoseText() {
-	 ctx.font = "36px Arial";
+	ctx.font = "36px Arial";
 	ctx.fillStyle = "white";
 	ctx.textAlign="center";
 	ctx.fillText("You Lose!",cnv.width/2,cnv.height/2);
+	ctx.textAlign="start";
+ }
+
+ function drawMainMenuText() {
+	ctx.font = "64px Arial";
+	ctx.fillStyle = "white";
+	ctx.textAlign="center";
+	ctx.fillText("Welcome To Target Test!",cnv.width/2,cnv.height/4);
 	ctx.textAlign="start";
  }
 
@@ -269,6 +289,9 @@ function drawButtons(menu=null) {
 	if (menu == menus.escape) {
 		buttonList = escapeButtons;
 	}
+	else if (menu == menus.main) {
+		buttonList = mainMenuButtons;
+	}
 	//draw buttons
 	for (let i = 0; i < buttonList.length; ++i) {
 		let btnctx = buttonList[i].canvas.getContext("2d");
@@ -303,6 +326,10 @@ function drawButtons(menu=null) {
 function update() {
 	//update the deltaTime
 	updateTime();
+	if (menu == menus.main) {
+		for (let i = 0; i < mainMenuButtons.length; mainMenuButtons[i].update(), ++i);
+	}
+	else {
 	//toggle escape menu on escape key press
 	if (keyStates[""]) {
 		if (!escapePressed) {
@@ -318,24 +345,24 @@ function update() {
 		if (escapeMenuActive) {
 			for (let i = 0; i < escapeButtons.length; escapeButtons[i].update(), ++i);
 		}
-		render();
-		return;
-	}
-	
-	updatePlacer();
-	
-	if (gameMode == gameModes.play && !(gameWon || gameLost)) {
-		updatePlayer();
-		updateBullets();
 	}
 	else {
-		//if we are not in play mode, still update the player's gun, but don't allow angle changes
-		updateGun(false);
+		updatePlacer();
+	
+		if (gameMode == gameModes.playtest && !(gameWon || gameLost)) {
+			updatePlayer();
+			updateBullets();
+		}
+		else {
+			//if we are not in play mode, still update the player's gun, but don't allow angle changes
+			updateGun(false);
+		}
+		
+		//update GUI elements
+		for (let i = 0; i < buttons.length; buttons[i].update(), ++i);
+		
+		}
 	}
-	
-	//update GUI elements
-	for (let i = 0; i < buttons.length; buttons[i].update(), ++i);
-	
 	//once all updates are out of the way, render the frame
 	render();
 }
@@ -351,6 +378,7 @@ function toggleEscapeMenu() {
  * return to the main menu
  */
 function returnToMainMenu() {
+	escapeMenuActive = false;
 	menu = menus.main;
 }
 /**
@@ -645,7 +673,7 @@ function updatePlacer() {
  */
 function toggleGameMode() {
 	//reset targets
-	if (gameMode == gameModes.play) {
+	if (gameMode == gameModes.playtest) {
 		for (let i = 0; i < targetLocs.length; ++i) {
 			targetLocs[i].alive = true;
 		}
@@ -655,15 +683,13 @@ function toggleGameMode() {
 	gameLost = false;
 	stopPlacer();
 	bullets.length = 0;
-	gameMode = (gameMode == gameModes.build ? gameModes.play : gameModes.build);
+	gameMode = (gameMode == gameModes.build ? gameModes.playtest : gameModes.build);
 	playerPos = playerStartPos;
 	numShots = maxNumShots;
 	fuel = maxFuel;
 	playerShotAng = -Math.PI/8;
-	//toggle active flag on settings buttons when starting/stopping the game
-	for (let i = 0; i < buttons.length-2; buttons[i].active = !buttons[i].active, ++i);
-	buttons[buttons.length-2].text = (gameMode == gameModes.build ? "play" : "stop");
 	choosingPower = false;
+	flipButtons();
 }
 
 /**
@@ -699,6 +725,7 @@ function loadLevel(JSONData) {
 	playerStartPos = JSON.parse(splitData[3]);
 	calcPlayerPosRot(playerStartPos.x);
 	maxNumShots = JSON.parse(splitData[4]);
+	buttons[6].text = "Ammo: " + maxNumShots;
 	numShots = maxNumShots;
 	maxFuel = JSON.parse(splitData[5]);
 	fuel = maxFuel;
@@ -733,25 +760,74 @@ function toggleAmmo(btn) {
 }
 
 /**
+ * switch to the level creator scene
+ */
+function openLevelCreator() {
+	menu = null;
+	resetGameState();
+	gameMode = gameModes.build;
+	if (buttons[buttons.length-2].text == "stop") {
+		flipButtons();
+	}
+}
+
+/**
+ * flip the state of all in-game buttons
+ */
+function flipButtons() {
+	//toggle active flag on settings buttons when starting/stopping the game
+	for (let i = 0; i < buttons.length-2; buttons[i].active = !buttons[i].active, ++i);
+	buttons[buttons.length-2].text = (gameMode == gameModes.build ? "play" : "stop");
+}
+
+/**
+ * hard reset all game variables
+ */
+function resetGameState() {
+	bullets.length = 0;
+	placing = false;
+
+	playerStartPos = {x:100,y:0};
+	playerPos = playerStartPos;
+	playerShotAng = -Math.PI/8;
+
+	maxNumShots = 3;
+	numShots = maxNumShots;
+	maxFuel = 100;
+	fuel = maxFuel;
+	choosingPower = false;
+
+	gameWon = false;
+	gameLost = false;
+	levelName = "";
+
+	randomizeTerrain();
+
+	wallVerts.length = 0;
+	targetLocs.length = 0;
+	escapeMenuActive = false;
+
+	loading = false;
+}
+
+/**
  * initialize all global variables
  */
 function initGlobals() {
 	//keep a global fps flag for game-speed (although all speeds should use deltaTime)
 	fps = 60;
+	bullets = [];
 	
 	//init global time vars for delta time calculation
 	prevTime = Date.now();
 	deltaTime = 0;
 	totalTime = 0;
 	
-	bullets = [];
-	
 	//game modes
-	gameModes = new Enum("build","play");
+	gameModes = new Enum("build","play", "playtest");
 	gameMode = gameModes.build;
 	
 	//placer
-	placing = false;
 	placeTypes = new Enum("wall","target", "eraser", "player");
 	placeType = null;
 	
@@ -761,30 +837,18 @@ function initGlobals() {
 	playerGunLength = 10;
 	playerRad = 8;
 	playerRot = 0;
-	playerStartPos = {x:100,y:0};
-	playerPos = playerStartPos;
-	playerShotAng = -Math.PI/8;
 	gunStartPos = {x:0,y:0};
 	gunFinalPos = {x:0,y:0};
 	
 	//settings
-	maxNumShots = 3;
-	numShots = maxNumShots;
-	maxFuel = 100;
-	fuel = maxFuel;
-	choosingPower = false;
 	powerSin = 1;
 	power = 0;
-	gameWon = false;
-	gameLost = false;
-	levelName = "";
 	
 	//terrain
 	terrainVerts = [];
 	numTerrainVerts = 101;
 	minTerrainY = 50;
 	minTerrainStartY = 200;
-	randomizeTerrain();
 	
 	//walls and targets
 	wallVerts = [];
@@ -814,6 +878,11 @@ function initGlobals() {
 	escapeButtons.push(new Button(300,250,cnv,"Resume Game",24,toggleEscapeMenu));
 	escapeButtons.push(new Button(300,300,cnv,"Return to Main Menu",24,returnToMainMenu));
 	
+	//buttons belonging to the main menu
+	mainMenuButtons = [];
+	mainMenuButtons.push(new Button(300,350,cnv,"Create a Level",24,openLevelCreator));
+	mainMenuButtons.push(new Button(300,400,cnv,"Play a User-Created Level",24,returnToMainMenu));
+	
 	//gradients
 	skyGradient = ctx.createRadialGradient(850,500,1,500,600,900);
 	skyGradient.addColorStop(0,"purple");
@@ -821,15 +890,21 @@ function initGlobals() {
 	groundGradient = ctx.createLinearGradient(cnv.width,0,0,cnv.height);
 	groundGradient.addColorStop(0,"#ff59b2");
 	groundGradient.addColorStop(1,"#387517");
+	mainMenuGradient = ctx.createLinearGradient(0,0,cnv.width,cnv.height);
+	mainMenuGradient.addColorStop(0,"#883311");
+	mainMenuGradient.addColorStop(1,"#336600");
 
-	//misc
+	//menus
 	menus = new Enum("main","escape","levelSelect");
-	
+	menu = null;
+
+	//toggles
 	escapePressed = false;
 	escapeMenuActive = false;
 
+	resetGameState();
+
 	//loading levels
-	loading = false;
 	levelId = getURLParams().levelId;
 	if (levelId != null) {
 		loading = true;
