@@ -30,11 +30,11 @@ function render() {
 	else {
 		if (menu == menus.main) {
 			drawMainMenuText();
-			drawButtons(menus.main);
+			drawButtons(mainMenuButtons);
 		}
 		else if (menu == menus.levelSelect) {
 			drawLevelSelectText();
-			drawButtons(menus.levelSelect);
+			drawButtons(levelSelectButtons);
 		}
 		else {
 			drawTerrain();
@@ -63,11 +63,11 @@ function render() {
 			}
 			
 			//finally draw the HUD
-			drawButtons();
-			
-			if (escapeMenuActive) {
-				darkenScreen();
-				drawButtons(menus.escape);
+			if (gameMode == gameModes.play) {
+				drawButtons(playButtons);
+			}
+			else {
+				drawButtons(buttons);
 			}
 		}
 	}
@@ -304,20 +304,10 @@ function drawTerrain() {
 }
 
 /**
- * draw the HUD
+ * draw all buttons in the specified button list
+ * @param buttonList: the list of buttons to draw
  */
-function drawButtons(menu=null) {
-	let buttonList = buttons;
-	if (menu == menus.escape) {
-		buttonList = escapeButtons;
-	}
-	else if (menu == menus.main) {
-		buttonList = mainMenuButtons;
-	}
-	else if (menu == menus.levelSelect) {
-		buttonList = levelSelectButtons;
-	}
-	//draw buttons
+function drawButtons(buttonList) {
 	for (let i = 0; i < buttonList.length; ++i) {
 		let btnctx = buttonList[i].canvas.getContext("2d");
 		//fill light blue border color
@@ -357,27 +347,10 @@ function update() {
 	else if (menu == menus.levelSelect) {
 		for (let i = 0; i < levelSelectButtons.length; levelSelectButtons[i].update(), ++i);
 	}
-	else {
-	//toggle escape menu on escape key press
-	if (keyStates[""]) {
-		if (!escapePressed) {
-			escapePressed = true;
-			toggleEscapeMenu();
-		}
-	}
-	else {
-		escapePressed = false;
-	}
-	//special mini-update and render when loading or escape menu is open
-	if (escapeMenuActive || loading) {
-		if (escapeMenuActive) {
-			for (let i = 0; i < escapeButtons.length; escapeButtons[i].update(), ++i);
-		}
-	}
-	else {
+	else if (!loading) {
 		updatePlacer();
 	
-		if (gameMode == gameModes.playtest && !(gameWon || gameLost)) {
+		if ((gameMode == gameModes.playtest || gameMode == gameModes.play) && !(gameWon || gameLost)) {
 			updatePlayer();
 			updateBullets();
 		}
@@ -386,9 +359,13 @@ function update() {
 			updateGun(false);
 		}
 		
-		//update GUI elements
-		for (let i = 0; i < buttons.length; buttons[i].update(), ++i);
-		
+		if (gameMode == gameModes.play) {
+			//update play buttons
+			for (let i = 0; i < playButtons.length; playButtons[i].update(), ++i);
+		}
+		else {
+			//update build/playtest buttons
+			for (let i = 0; i < buttons.length; buttons[i].update(), ++i);
 		}
 	}
 	//once all updates are out of the way, render the frame
@@ -396,17 +373,9 @@ function update() {
 }
 
 /**
- * toggle the escape menu on / off
- */
-function toggleEscapeMenu() {
-	escapeMenuActive = !escapeMenuActive;
-}
-
-/**
  * return to the main menu
  */
 function returnToMainMenu() {
-	escapeMenuActive = false;
 	menu = menus.main;
 }
 /**
@@ -701,13 +670,12 @@ function updatePlacer() {
  */
 function toggleGameMode() {
 	//reset targets
-	if (gameMode == gameModes.playtest) {
+	if (gameMode != gameModes.build) {
 		for (let i = 0; i < targetLocs.length; ++i) {
 			targetLocs[i].alive = true;
 		}
 	}
 	gameWon = false;
-	buttons[buttons.length-1].active = false;
 	gameLost = false;
 	stopPlacer();
 	bullets.length = 0;
@@ -753,7 +721,7 @@ function loadLevel(JSONData) {
 	playerStartPos = JSON.parse(splitData[3]);
 	calcPlayerPosRot(playerStartPos.x);
 	maxNumShots = JSON.parse(splitData[4]);
-	buttons[6].text = "Ammo: " + maxNumShots;
+	buttons[7].text = "Ammo: " + maxNumShots;
 	numShots = maxNumShots;
 	maxFuel = JSON.parse(splitData[5]);
 	fuel = maxFuel;
@@ -813,8 +781,9 @@ function openLevelList() {
  */
 function flipButtons() {
 	//toggle active flag on settings buttons when starting/stopping the game
-	for (let i = 0; i < buttons.length-2; buttons[i].active = !buttons[i].active, ++i);
+	for (let i = 1; i < buttons.length-2; buttons[i].active = !buttons[i].active, ++i);
 	buttons[buttons.length-2].text = (gameMode == gameModes.build ? "play" : "stop");
+	buttons[buttons.length-1].active = false;
 }
 
 /**
@@ -829,7 +798,7 @@ function resetGameState() {
 	playerShotAng = -Math.PI/8;
 
 	maxNumShots = 2;
-	toggleAmmo(buttons[6]);
+	toggleAmmo(buttons[7]);
 	numShots = maxNumShots;
 	maxFuel = 100;
 	fuel = maxFuel;
@@ -843,7 +812,6 @@ function resetGameState() {
 
 	wallVerts.length = 0;
 	targetLocs.length = 0;
-	escapeMenuActive = false;
 
 	loading = false;
 }
@@ -868,8 +836,13 @@ function displayLevelList(levelListString) {
  * @param levelId: the id of the level to load
  */
 function startLoadLevel(levelId) {
-	loading = true;
 	menu = null;
+	resetGameState();
+	loading = true;
+	gameMode = gameModes.play;
+	if (buttons[buttons.length-2].text == "stop") {
+		flipButtons();
+	}
 	getLevelData(levelId);
 }
 
@@ -887,6 +860,15 @@ function changeLevelSelectPage(increase) {
 	for (let i = 3; i < levelSelectButtons.length; ++i) {
 		levelSelectButtons[i].y += (increase ? -cnv.height : cnv.height);
 	}
+}
+
+/** 
+ * reset the state of the current play level
+ */
+function retryLevel() {
+	toggleGameMode();
+	toggleGameMode();
+	gameMode = gameModes.play;
 }
 
 /**
@@ -939,23 +921,19 @@ function initGlobals() {
 	//bullets
 	bulletRadius = 4;
 	
-	//global list of UI buttons
+	//playtest buttons buttons
 	buttons = [];
-	buttons.push(new Button(10,10,uicnv,"Randomize Terrain",24,randomizeTerrain));
-	buttons.push(new Button(10,60,uicnv,"Place Wall",24,startPlacer,placeTypes.wall));
-	buttons.push(new Button(10,110,uicnv,"Place Target",24,startPlacer,placeTypes.target));
-	buttons.push(new Button(10,160,uicnv,"Place Player",24,startPlacer,placeTypes.player));
-	buttons.push(new Button(10,210,uicnv,"Eraser",24,startPlacer,placeTypes.eraser));
-	buttons.push(new Button(10,260,uicnv,"Fuel: 100%",24,toggleFuel));
-	buttons.push(new Button(10,310,uicnv,"Ammo: 3",24,toggleAmmo));
-	buttons.push(new Button(10,360,uicnv,"Play",24,toggleGameMode));
-	buttons.push(new Button(10,410,uicnv,"Publish Level",24,publishLevel));
+	buttons.push(new Button(10,10,uicnv,"Return to Main Menu",24,returnToMainMenu));
+	buttons.push(new Button(10,60,uicnv,"Randomize Terrain",24,randomizeTerrain));
+	buttons.push(new Button(10,110,uicnv,"Place Wall",24,startPlacer,placeTypes.wall));
+	buttons.push(new Button(10,160,uicnv,"Place Target",24,startPlacer,placeTypes.target));
+	buttons.push(new Button(10,210,uicnv,"Place Player",24,startPlacer,placeTypes.player));
+	buttons.push(new Button(10,260,uicnv,"Eraser",24,startPlacer,placeTypes.eraser));
+	buttons.push(new Button(10,310,uicnv,"Fuel: 100%",24,toggleFuel));
+	buttons.push(new Button(10,360,uicnv,"Ammo: 3",24,toggleAmmo));
+	buttons.push(new Button(10,410,uicnv,"Play",24,toggleGameMode));
+	buttons.push(new Button(10,460,uicnv,"Publish Level",24,publishLevel));
 	buttons[buttons.length-1].active = false;
-
-	//buttons belonging to the escape menu
-	escapeButtons = [];
-	escapeButtons.push(new Button(300,250,cnv,"Resume Game",24,toggleEscapeMenu));
-	escapeButtons.push(new Button(300,300,cnv,"Return to Main Menu",24,returnToMainMenu));
 	
 	//buttons belonging to the main menu
 	mainMenuButtons = [];
@@ -967,6 +945,11 @@ function initGlobals() {
 	levelSelectButtons.push(new Button(10,60,uicnv,"Next Page",24,changeLevelSelectPage,true));
 	levelSelectButtons.push(new Button(10,110,uicnv,"Previous Page",24,changeLevelSelectPage,false));
 	levelSelectButtons.push(new Button(10,160,uicnv,"Return to Main Menu",24,returnToMainMenu));
+
+	//play buttons
+	playButtons = [];
+	playButtons.push(new Button(10,10,uicnv,"Return to Main Menu",24,returnToMainMenu));
+	playButtons.push(new Button(10,60,uicnv,"Retry",24,retryLevel));
 
 	//gradients
 	skyGradient = ctx.createRadialGradient(850,500,1,500,600,900);
@@ -980,12 +963,8 @@ function initGlobals() {
 	mainMenuGradient.addColorStop(1,"#336600");
 
 	//menus
-	menus = new Enum("main","escape","levelSelect");
-	menu = null;
-
-	//toggles
-	escapePressed = false;
-	escapeMenuActive = false;
+	menus = new Enum("main","levelSelect");
+	menu = menus.main;
 
 	//level select vars
 	curPage = 0;
