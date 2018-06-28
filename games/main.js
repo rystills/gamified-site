@@ -775,9 +775,7 @@ function openLevelCreator() {
 	menu = null;
 	resetGameState();
 	gameMode = gameModes.build;
-	if (buttons[buttons.length-2].text == "stop") {
-		flipButtons();
-	}
+	fixButtons();
 }
 
 /** 
@@ -787,6 +785,15 @@ function openLevelList() {
 	menu = menus.levelSelect;
 	loading = true;
 	getLevelList("targetTest");
+}
+
+/**
+ * prepare all level create buttons in their correct state
+ */
+function fixButtons() {
+	for (let i = 1; i < buttons.length-2; buttons[i].active = true, ++i);
+	buttons[buttons.length-2].text = "play";
+	buttons[buttons.length-1].active = false;
 }
 
 /**
