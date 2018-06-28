@@ -220,6 +220,22 @@ function getLevelList(gameName) {
 }
 
 /**
+ * retrieve a string containing all cleared level ids
+ * @param gameName: the name of the game to which the levels should belong
+ */
+function getClearedLevels(gameName) {
+	$.ajax({
+		type: "POST",
+		url: '../../../../../backend/getClearedLevels.php',
+		data: {game_name: gameName},
+		success: function(data){
+			//since AJAX is async, its up to the current game to implement loadLevel and handle async on its own
+			setClearedLevels(data);
+		}
+	});
+}
+
+/**
  * get the JSON data corresponding to the specified level id
  * @param levelId: the id of the level we wish to load
  * @returns the JSON data corresponding to the specified level id

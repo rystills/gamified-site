@@ -469,7 +469,10 @@ function winGame() {
 	gameWon = true;
 	buttons[buttons.length-1].active = true;
 	if (gameMode == gameModes.play) {
-		sendLevelVictory(curLevel,curLevelCreator);
+		if (clearedLevels.indexOf(curLevel) == -1) {
+			sendLevelVictory(curLevel,curLevelCreator);
+			clearedLevels.push(curLevel);
+		}		
 	}
 }
 
@@ -837,7 +840,7 @@ function displayLevelList(levelListString) {
 	numPages = 1 + Math.floor((levelList.length-2) / 30);
 	levelSelectButtons.length = 3;
 	for (let i = 0; i < levelList.length-2; i+=3) {
-		levelSelectButtons.push(new Button(10,100 + 50*(i/3) + 100 * Math.floor(i/30),cnv,levelList[i+1] + " - by " + levelList[i+2],24,startLoadLevel,i));
+		levelSelectButtons.push(new Button(10,100 + 50*(i/3) + 100 * Math.floor(i/30),cnv,(clearedLevels.indexOf(levelList[i]) == -1 ? "\u{2610}" : "\u{2611}") + " " + levelList[i+1] + " - by " + levelList[i+2],24,startLoadLevel,i));
 	}
 }
 
@@ -872,6 +875,14 @@ function changeLevelSelectPage(increase) {
 	for (let i = 3; i < levelSelectButtons.length; ++i) {
 		levelSelectButtons[i].y += (increase ? -cnv.height : cnv.height);
 	}
+}
+
+/**
+ * set a local array contained clearedLevels from the string retrieved from the database
+ * @param data: the cleared levels string returned by the database;
+ */
+function setClearedLevels(data) {
+	clearedLevels = data.split(',');
 }
 
 /** 
@@ -984,8 +995,9 @@ function initGlobals() {
 	curLevel = null;
 	curLevelCreator = null;
 	levelList = null;
-
 	resetGameState();
+	clearedLevels = "";
+	getClearedLevels("targetTest");
 }
 
 //disallow right-click context menu as right click functionality is often necessary for gameplay
