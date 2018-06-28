@@ -13,6 +13,6 @@ include($_SERVER["DOCUMENT_ROOT"] . '/backend/session.php');
 		<canvas id="cnv" width="800" height="600"></canvas><canvas 
 		id="uicnv" width=320" height="600"></canvas>
 	</div>
-	<script src="main.js"></script>
+	<script src="targetTest_main.js"></script>
 </body>
 </html>

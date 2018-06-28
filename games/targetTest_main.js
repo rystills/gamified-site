@@ -556,7 +556,7 @@ function initCanvases() {
 function loadAssets() {
 	//setup a global, ordered list of asset files to load
 	requiredFiles = [
-		"images\\star.png", "images\\target.png", "images\\eraser.png", "images\\bullet.png", //images
+		"targetTest_images\\star.png", "targetTest_images\\target.png", "targetTest_images\\eraser.png", "targetTest_images\\bullet.png", //images
 		"src\\util.js","src\\setupKeyListeners.js", //misc functions
 		"src\\classes\\Enum.js", "src\\classes\\Button.js" //classes
 		];
