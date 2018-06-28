@@ -38,8 +38,14 @@
 			data: {username: document.getElementById('username').value, 
 			password: document.getElementById('password').value},
 			success: function(data){
-				alert(data);
-			}
+                if (data == "Success") {
+                  alert("New Account Created Successfully!");
+                  window.location.href = "../../login.html";
+                }
+                else {
+                  alert(data);
+                }
+            }
 		});
 	}
 	//trigger button click on enter while either input field is active
