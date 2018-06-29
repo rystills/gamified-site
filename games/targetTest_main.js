@@ -407,28 +407,50 @@ function updateBullets() {
 			}
 			//check collisions with walls
 			for (let r = 0; r < wallVerts.length; r+=2) {
-				if (collisionCircleLine(bulletRadius,bullets[i],wallWidth,wallVerts[r],wallVerts[r+1])) {
-					//calculate bounce angle
-					let bulletDir = getAngle(bullets[i].x,bullets[i].y,bullets[i].x + bullets[i].xVel, bullets[i].y + bullets[i].yVel,true);
-					let bulletSpeed = getDistance(bullets[i].x,bullets[i].y,bullets[i].x + bullets[i].xVel, bullets[i].y + bullets[i].yVel);
-					let wallDir = getAngle(wallVerts[r].x,wallVerts[r].y,wallVerts[r+1].x,wallVerts[r+1].y,true);					
-					//rotate coordinate system
-					bulletDir -= wallDir;
-					//bounce
-					let bounceXVel = Math.cos(bulletDir) * bulletSpeed;
-					let bounceYVel = Math.sin(bulletDir) * bulletSpeed * -1;
-					//rotate coordinate system back
-					let bounceBulletDir = getAngle(bullets[i].x,bullets[i].y,bullets[i].x + bounceXVel, bullets[i].y + bounceYVel,true);
-					bounceBulletDir += wallDir
-					//return to velocities
-					bullets[i].xVel = Math.cos(bounceBulletDir) * bulletSpeed;
-					bullets[i].yVel = Math.sin(bounceBulletDir) * bulletSpeed;
-					
-					//push the ball out of the collision before continuing
-					while (collisionCircleLine(bulletRadius,bullets[i],wallWidth,wallVerts[r],wallVerts[r+1])) {
-						bullets[i].x += bullets[i].xVel/100;
-						bullets[i].y += bullets[i].yVel/100;
+				let prevX = bullets[i].x;
+				let prevY = bullets[i].y;
+				let prevXVel = bullets[i].xVel;
+				let prevYVel = bullets[i].yVel;
+				let angOff = -Math.PI/2;
+				//this loop allows us to try applying a quarter rotation to angle when colliding with the line verts
+				top:
+				for (let j = 0; j < 2; ++j) {
+					bullets[i].x = prevX;
+					bullets[i].y = prevY;
+					bullets[i].xVel = prevXVel;
+					bullets[i].yVel = prevYVel;
+					angOff += Math.PI/2;
+					if (collisionCircleLine(bulletRadius,bullets[i],wallWidth,wallVerts[r],wallVerts[r+1])) {
+						//calculate bounce angle
+						let bulletDir = getAngle(bullets[i].x,bullets[i].y,bullets[i].x + bullets[i].xVel, bullets[i].y + bullets[i].yVel,true);
+						let bulletSpeed = getDistance(bullets[i].x,bullets[i].y,bullets[i].x + bullets[i].xVel, bullets[i].y + bullets[i].yVel);
+						let wallDir = angOff + getAngle(wallVerts[r].x,wallVerts[r].y,wallVerts[r+1].x,wallVerts[r+1].y,true);					
+						//rotate coordinate system
+						bulletDir -= wallDir;
+						//bounce
+						let bounceXVel = Math.cos(bulletDir) * bulletSpeed;
+						let bounceYVel = Math.sin(bulletDir) * bulletSpeed * -1;
+						//rotate coordinate system back
+						let bounceBulletDir = getAngle(bullets[i].x,bullets[i].y,bullets[i].x + bounceXVel, bullets[i].y + bounceYVel,true);
+						bounceBulletDir += wallDir;
+						//return to velocities
+						bullets[i].xVel = Math.cos(bounceBulletDir) * bulletSpeed;
+						bullets[i].yVel = Math.sin(bounceBulletDir) * bulletSpeed;
+						
+						//push the ball out of the collision
+						for (let k = 0; k < 8; ++k) {
+							bullets[i].x += bullets[i].xVel/100;
+							bullets[i].y += bullets[i].yVel/100;
+							if (!collisionCircleLine(bulletRadius,bullets[i],wallWidth,wallVerts[r],wallVerts[r+1])) {
+								break;
+							}
+							//we couldn't get out in a full step; try again with a quarter rotation applied to wall angle
+							if (k == 7) {
+								continue top;
+							}
+						}
 					}
+					break;
 				}
 			}
 			//check collisions with terrain
