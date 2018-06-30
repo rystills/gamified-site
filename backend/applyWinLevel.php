@@ -6,9 +6,9 @@ if(!isset($_SESSION['username'])){
 	header("location:login.html");   
 }
 
-$uname = $_SESSION['username'];
-$level_id = $_POST['level_id'];
-$creator_name = $_POST['creator_name'];
+$uname = $conn->real_escape_string($_SESSION['username']);
+$level_id = $conn->real_escape_string($_POST['level_id']);
+$creator_name = $conn->real_escape_string($_POST['creator_name']);
 
 $query = "SELECT score, clearedLevels FROM users WHERE username = ".'"'.$uname.'";';
 $result = mysqli_query($conn, $query);

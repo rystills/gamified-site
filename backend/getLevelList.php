@@ -5,7 +5,7 @@ session_start();
 if(!isset($_SESSION['username'])){
 	header("location:login.html");   
 }
-$gameType = $_POST['game_name'];
+$gameType = $conn->real_escape_string($_POST['game_name']);
 
 $query = "SELECT level_name,creator,id FROM levels WHERE game_type = ".'"'.$gameType.'" ORDER BY id;'; // Query to select the fields in each row
 

@@ -7,7 +7,7 @@
 	}
 	
 	//query for desired user stats and stick them into session data (username is already there as it doesn't change after login)
-	$user_check = $_SESSION['username'];
+	$user_check = $conn->real_escape_string($_SESSION['username']);
 	$sql = "SELECT score FROM `users` where `username` = '$user_check'";
 	$result = mysqli_query($conn, $sql);
 	$row = $result->fetch_assoc();

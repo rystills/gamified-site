@@ -1,7 +1,7 @@
 <?php 
 require_once( $_SERVER["DOCUMENT_ROOT"] . "/backend/dbconfig.php");
-$name = $_POST['username'];
-$pass = $_POST['password'];
+$name = $conn->real_escape_string($_POST['username']);
+$pass = $conn->real_escape_string($_POST['password']);
 
 //verify that credentials meet requirements
 if (strlen($pass) < 6) {

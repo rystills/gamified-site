@@ -5,7 +5,7 @@ session_start();
 if(!isset($_SESSION['username'])){
 	header("location:login.html");   
 }
-$uname = $_SESSION['username'];
+$uname = $conn->real_escape_string($_SESSION['username']);
 $query = "SELECT clearedLevels FROM users WHERE username = ".'"'.$uname.'"'; // Query to select the fields in each row
 $result = mysqli_query($conn, $query);
 $row = $result->fetch_assoc();

@@ -6,7 +6,7 @@ if(!isset($_SESSION['username'])){
 	header("location:login.html");   
 }
 
-$levelId = $_POST['level_id'];
+$levelId = $conn->real_escape_string($_POST['level_id']);
 $query = "SELECT content FROM levels WHERE id = ".'"'.$levelId.'";'; // Query to get data from desired level id
 
 $result = mysqli_query($conn, $query);
