@@ -25,7 +25,7 @@ function initLoadingScreen() {
 	ctx.fillRect(0,0,cnv.width,cnv.height);
 
 	//draw the loading title
-	ctx.font = "74px Arial";
+	ctx.font = "64px Arial";
 	ctx.fillStyle = 'white';
 	ctx.textAlign="center";
 	ctx.fillText("Loading " + document.title + "...",cnv.width/2,cnv.height/2);
@@ -103,6 +103,8 @@ function loadSingleAsset() {
 	ctx.fillRect(0,cnv.height/2 + 100,cnv.width,cnv.height/2 + 100);
 	ctx.fillStyle = 'white';
 	ctx.fillText("loading " + splitName[0] + '.' + splitName[1],20,580);	
+
+
 	//draw loading bar
 	ctx.fillStyle = "gray";
 	ctx.fillRect(cnv.width/2-100,cnv.height/2+120,200,25);

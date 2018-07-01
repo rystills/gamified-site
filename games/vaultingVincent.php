@@ -12,7 +12,7 @@ include($_SERVER["DOCUMENT_ROOT"] . '/backend/session.php');
 	<!-- Custom styles for this template -->
 	<link href="../../instructions.css" rel="stylesheet">
 
-	<title>Vaulting Test</title>
+	<title>Vaulting Vincent</title>
 	</head>
 <body style="background-color:#9666c6">
 	<div id="canvasDiv" align="center">

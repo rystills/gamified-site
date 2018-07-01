@@ -331,6 +331,11 @@ function drawButtons(buttonList) {
 function update() {
 	//update the deltaTime
 	updateTime();
+	//make sure the main theme is playing (will not start until the user engages the page for the first time)
+	if (sounds["nearEmpty"].paused) {
+		sounds["nearEmpty"].loop = true;
+		sounds["nearEmpty"].play();
+	}
 	if (menu == menus.main) {
 		for (let i = 0; i < mainMenuButtons.length; mainMenuButtons[i].update(), ++i);
 	}
@@ -1041,10 +1046,6 @@ function initGlobals() {
 	resetGameState();
 	clearedLevels = "";
 	getClearedLevels("targetTest");
-
-	//start the music
-	sounds["nearEmpty"].loop = true;
-	sounds["nearEmpty"].play();
 }
 
 //disallow right-click context menu as right click functionality is often necessary for gameplay
