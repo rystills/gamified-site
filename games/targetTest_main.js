@@ -402,6 +402,7 @@ function updateBullets() {
 				}
 				if (getDistance(bullets[i].x,bullets[i].y,targetLocs[r].x,targetLocs[r].y) < bulletRadius + targetRadius) {
 					targetLocs[r].alive = false;
+					restartSound(sounds["hitTarget"]);
 					--r;
 				}
 			}
@@ -449,6 +450,7 @@ function updateBullets() {
 								continue top;
 							}
 						}
+					restartSound(sounds["bounce"]);
 					}
 					break;
 				}
@@ -457,6 +459,7 @@ function updateBullets() {
 			for (let r = 0; r < terrainVerts.length; ++r) {
 				if (getDistance(bullets[i].x,bullets[i].y,terrainVerts[r].x,terrainVerts[r].y) < bulletRadius) {
 					bullets.splice(i,1);
+					restartSound(sounds["hitGround"]);
 					--i;
 					j = 15;
 					break;
@@ -480,6 +483,7 @@ function updateBullets() {
 	//end game if player is out of shots and no bullets are left alive
 	if (bullets.length == 0 && numShots == 0) {
 		gameLost = true;
+		restartSound(sounds["lose"]);
 		return;
 	}
 }
@@ -489,6 +493,7 @@ function updateBullets() {
  */
 function winGame() {
 	gameWon = true;
+	restartSound(sounds["win"]);
 	buttons[buttons.length-1].active = true;
 	if (gameMode == gameModes.play) {
 		if (clearedLevels.indexOf(curLevel) == -1) {
@@ -507,10 +512,15 @@ function updatePlayer() {
 		if (keyStates["A"] && playerPos.x > minPlayerPos) {
 			calcPlayerPosRot(playerPos.x-1, false);
 			fuel-=.4;
+			sounds["move"].play();
 		}
 		else if (keyStates["D"] && playerPos.x < cnv.width - minPlayerPos) {
 			calcPlayerPosRot(playerPos.x+1, false);
 			fuel-=.4;
+			sounds["move"].play()
+		}
+		else if (!sounds["move"].paused) {
+			stopSound(sounds["move"]);
 		}
 	}
 	//aiming
@@ -522,15 +532,19 @@ function updatePlayer() {
 		powerSin = 1;
 		power = 0;
 	}
-	if (mouseDownLeft) {
-		power += powerSin;
-		if (power%100 == 0) {
-			powerSin *= -1;
+	if (mouseDownLeft && choosingPower) {
+		if (mouseDownLeft) {
+			sounds["chargeShot"].play();
+			power += powerSin;
+			if (power%100 == 0) {
+				powerSin *= -1;
+			}
 		}
 	}
 	else {
 		if (choosingPower) {
 			choosingPower = false;
+			stopSound(sounds["chargeShot"]);
 			fireShot();
 		}
 	}
@@ -542,6 +556,7 @@ function updatePlayer() {
 function fireShot() {
 	bullets.push({x:gunFinalPos.x,y:gunFinalPos.y,xVel:Math.cos(playerShotAng)*(power*.25),yVel:Math.sin(playerShotAng)*(power*.25)});
 	--numShots;
+	restartSound(sounds["shoot"]);
 }
 
 /**
@@ -579,6 +594,9 @@ function loadAssets() {
 	//setup a global, ordered list of asset files to load
 	requiredFiles = [
 		"targetTest_images\\star.png", "targetTest_images\\target.png", "targetTest_images\\eraser.png", "targetTest_images\\bullet.png", //images
+		"targetTest_sounds\\hitGround.ogg","targetTest_sounds\\hitTarget.ogg","targetTest_sounds\\hurt.ogg","targetTest_sounds\\lose.ogg", //sounds
+		"targetTest_sounds\\confirm.ogg","targetTest_sounds\\select.ogg","targetTest_sounds\\chargeShot.ogg", "targetTest_sounds\\bounce.ogg",//sounds
+		"targetTest_sounds\\move.ogg", "targetTest_sounds\\shoot.ogg", "targetTest_sounds\\win.ogg","targetTest_sounds\\erase.ogg","targetTest_sounds\\place.ogg", //sounds
 		"src\\util.js","src\\setupKeyListeners.js", //misc functions
 		"src\\classes\\Enum.js", "src\\classes\\Button.js" //classes
 		];
@@ -674,6 +692,7 @@ function updatePlacer() {
 				for (let i = 0; i < targetLocs.length; ++i) {
 					if (getDistance(cnv.mousePos.x,cnv.mousePos.y,targetLocs[i].x,targetLocs[i].y) < eraserRadius + targetRadius) {
 						targetLocs.splice(i, 1);
+						restartSound(sounds["erase"]);
 						--i;
 					}
 				}
@@ -681,6 +700,7 @@ function updatePlacer() {
 				for (let i = 0; i < wallVerts.length-1; i+=2) {
 					if (collisionCircleLine(eraserRadius,cnv.mousePos,wallWidth,wallVerts[i],wallVerts[i+1])) {
 						wallVerts.splice(i,2);
+						restartSound(sounds["erase"]);
 						i-=2;
 					}
 				}
@@ -689,9 +709,11 @@ function updatePlacer() {
 		else if (mousePressedLeft) {
 			if (placeType == placeTypes.wall) {
 				wallVerts.push(cnv.mousePos);
+				restartSound(sounds["place"]);
 			}
 			else if (placeType == placeTypes.target) {
 				targetLocs.push({"x":cnv.mousePos.x,"y":cnv.mousePos.y,"alive":true});
+				restartSound(sounds["place"]);
 			}
 			else if (placeType == placeTypes.player) {
 				stopPlacer();

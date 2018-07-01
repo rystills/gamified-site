@@ -24,18 +24,23 @@ Button.prototype.update = function() {
 			else {
 				this.function(this.arg,this);
 			}
+			restartSound(sounds["confirm"]);
 		}
 
 	}
-	
-	this.state = "neutral";
 	
 	//set state based off of pressed
 	if (this.pressed && mousing) {
 		this.state = "press";
 	}
 	else if (mousing) {
+		if (this.state == "neutral") {
+			restartSound(sounds["select"]);
+		}
 		this.state = "hover";
+	}
+	else {
+		this.state = "neutral";
 	}
 
 	//if mouse button is not held down, toggle pressed off

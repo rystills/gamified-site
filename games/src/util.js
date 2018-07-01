@@ -105,6 +105,24 @@ function getAngle(x1,y1,x2,y2,radians) {
 }
 
 /**
+ * stop the desired sound from playing
+ * @param sound: the sound we wish to stop
+ */
+function stopSound(sound) {
+	sound.pause();
+	sound.currentTime = 0;
+}
+
+/**
+ * restart the desired sound
+ * @param sound: the sound we wish to restart
+ */
+function restartSound(sound) {
+	sound.currentTime = 0;
+	sound.play();
+}
+
+/**
  * get a random integer between min (inclusive) and max (exclusive)
  * @param min: the inclusive minimum integer value
  * @param max: the exclusive maximum integer value
