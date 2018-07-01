@@ -422,6 +422,7 @@ function updateBullets() {
 					bullets[i].yVel = prevYVel;
 					angOff += Math.PI/2;
 					if (collisionCircleLine(bulletRadius,bullets[i],wallWidth,wallVerts[r],wallVerts[r+1])) {
+						restartSound(sounds["bounce"]);
 						//calculate bounce angle
 						let bulletDir = getAngle(bullets[i].x,bullets[i].y,bullets[i].x + bullets[i].xVel, bullets[i].y + bullets[i].yVel,true);
 						let bulletSpeed = getDistance(bullets[i].x,bullets[i].y,bullets[i].x + bullets[i].xVel, bullets[i].y + bullets[i].yVel);
@@ -450,7 +451,6 @@ function updateBullets() {
 								continue top;
 							}
 						}
-					restartSound(sounds["bounce"]);
 					}
 					break;
 				}
