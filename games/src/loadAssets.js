@@ -109,22 +109,3 @@ function loadSingleAsset() {
 	ctx.fillStyle = "white";
 	ctx.fillRect(cnv.width/2-100,cnv.height/2+120,200*(assetNum/requiredFiles.length),25);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

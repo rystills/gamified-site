@@ -76,16 +76,6 @@ function render() {
 	mousePressedRight = false;
 }
 
-/** 
- * darken the screen with a partial transparency black fill
- */
-function darkenScreen() {
-	ctx.fillStyle = "rgba(0,0,0,.7)";
-	ctx.fillRect(0,0,cnv.width,cnv.height);
-	uictx.fillStyle = "rgba(0,0,0,.7)";
-	uictx.fillRect(0,0,uicnv.width,uicnv.height);
-}
-
 /**
  * draw loading screen text
  */
@@ -598,8 +588,8 @@ function loadAssets() {
 		"targetTest_sounds\\confirm.ogg","targetTest_sounds\\select.ogg","targetTest_sounds\\chargeShot.ogg", "targetTest_sounds\\bounce.ogg",//sounds
 		"targetTest_sounds\\move.ogg", "targetTest_sounds\\shoot.ogg", "targetTest_sounds\\win.ogg","targetTest_sounds\\erase.ogg","targetTest_sounds\\place.ogg", //sounds
 		"targetTest_sounds\\nearEmpty.ogg", //music
-		"src\\util.js","src\\setupKeyListeners.js", //misc functions
-		"src\\classes\\Enum.js", "src\\classes\\Button.js" //classes
+		"src\\util.js","src\\setupKeyListeners.js", //util functions
+		"src\\classes\\Enum.js", "src\\classes\\Button.js" //util classes
 		];
 	
 	//manually load the asset loader
@@ -718,6 +708,7 @@ function updatePlacer() {
 			}
 			else if (placeType == placeTypes.player) {
 				stopPlacer();
+				restartSound(sounds["place"]);
 			}
 		}
 	}

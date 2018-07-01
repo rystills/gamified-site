@@ -346,6 +346,16 @@ function clamp(value, min, max) {
   	return Math.min(Math.max(value, min), max);
 };
 
+/** 
+ * darken the screen with a partial transparency black fill
+ */
+function darkenScreen() {
+	ctx.fillStyle = "rgba(0,0,0,.7)";
+	ctx.fillRect(0,0,cnv.width,cnv.height);
+	uictx.fillStyle = "rgba(0,0,0,.7)";
+	uictx.fillRect(0,0,uicnv.width,uicnv.height);
+}
+
 /**
  * calls initGlobals and begins the main update loop; to be called after resource loading
  */
