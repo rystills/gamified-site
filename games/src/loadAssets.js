@@ -13,8 +13,23 @@ function loadAssets() {
 	
 	//quick and dirty way to store local text files as JS objects
 	object = null;
+
+	initLoadingScreen();
 	
 	loadSingleAsset();
+}
+
+function initLoadingScreen() {
+	//clear the screen to black
+	ctx.fillStyle = "black";
+	ctx.fillRect(0,0,cnv.width,cnv.height);
+
+	//draw the loading title
+	ctx.font = "74px Arial";
+	ctx.fillStyle = 'white';
+	ctx.textAlign="center";
+	ctx.fillText("Loading " + document.title + "...",cnv.width/2,cnv.height/2);
+	ctx.textAlign="start";
 }
 
 /**
@@ -79,6 +94,37 @@ function loadSingleAsset() {
 	else {
 		sounds[parsePath(requiredFiles[assetNum])] = elem;
 	}
-	
 	++assetNum;
+
+	//update loading item text and progress bar
+	//clear the lower portion of the canvas and update the loading status to display asset name
+	ctx.font = "30px Arial";
+	ctx.fillStyle = "black";
+	ctx.fillRect(0,cnv.height/2 + 100,cnv.width,cnv.height/2 + 100);
+	ctx.fillStyle = 'white';
+	ctx.fillText("loading " + splitName[0] + '.' + splitName[1],20,580);	
+	//draw loading bar
+	ctx.fillStyle = "gray";
+	ctx.fillRect(cnv.width/2-100,cnv.height/2+120,200,25);
+	ctx.fillStyle = "white";
+	ctx.fillRect(cnv.width/2-100,cnv.height/2+120,200*(assetNum/requiredFiles.length),25);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

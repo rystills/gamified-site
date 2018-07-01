@@ -597,6 +597,7 @@ function loadAssets() {
 		"targetTest_sounds\\hitGround.ogg","targetTest_sounds\\hitTarget.ogg","targetTest_sounds\\hurt.ogg","targetTest_sounds\\lose.ogg", //sounds
 		"targetTest_sounds\\confirm.ogg","targetTest_sounds\\select.ogg","targetTest_sounds\\chargeShot.ogg", "targetTest_sounds\\bounce.ogg",//sounds
 		"targetTest_sounds\\move.ogg", "targetTest_sounds\\shoot.ogg", "targetTest_sounds\\win.ogg","targetTest_sounds\\erase.ogg","targetTest_sounds\\place.ogg", //sounds
+		"targetTest_sounds\\nearEmpty.ogg", //music
 		"src\\util.js","src\\setupKeyListeners.js", //misc functions
 		"src\\classes\\Enum.js", "src\\classes\\Button.js" //classes
 		];
@@ -1049,6 +1050,10 @@ function initGlobals() {
 	resetGameState();
 	clearedLevels = "";
 	getClearedLevels("targetTest");
+
+	//start the music
+	sounds["nearEmpty"].loop = true;
+	sounds["nearEmpty"].play();
 }
 
 //disallow right-click context menu as right click functionality is often necessary for gameplay
