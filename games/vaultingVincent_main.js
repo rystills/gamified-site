@@ -75,6 +75,9 @@ function initGlobals() {
 	prevTime = Date.now();
 	deltaTime = 0;
 	totalTime = 0;
+
+	//demo data
+	tileLocs = [{x:10,y:10}];
 }
 
 //disallow right-click context menu as right click functionality is often necessary for gameplay
