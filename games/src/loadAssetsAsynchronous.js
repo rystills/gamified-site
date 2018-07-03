@@ -1,9 +1,9 @@
+//**Experimental!** Loads assets in bulk, resulting in much faster load times, but occasionally encounters a 508 error. More testing is needed.
+
 /**
  * loads all the needed files, then calls startGame to begin the game
  */
 function loadAssets() {		
-	assetNum = 0;
-	
 	//global list of script contents
 	scripts = {};
 	//global list of images
@@ -15,8 +15,8 @@ function loadAssets() {
 	object = null;
 
 	initLoadingScreen();
-	
-	loadSingleAsset();
+	loadedAssets = 0;
+	for (assetNum = 0; assetNum < requiredFiles.length; loadSingleAsset(), ++assetNum);
 }
 
 function initLoadingScreen() {
@@ -52,6 +52,31 @@ function cloneSounds() {
 }
 
 /**
+ * update the progress bar to reflect how many assets still need to be loaded
+ */
+function updateProgressBar() {
+	//draw loading bar
+	ctx.fillStyle = "gray";
+	ctx.fillRect(cnv.width/2-100,cnv.height/2+120,200,25);
+	ctx.fillStyle = "white";
+	ctx.fillRect(cnv.width/2-100,cnv.height/2+120,200*(loadedAssets/requiredFiles.length),25);
+}
+
+/**
+ * increment asset count, signifying that another asset has been loaded
+ */
+function incrementAssetCount() {
+	if (++loadedAssets == requiredFiles.length) {
+		//once we've loaded all the objects, we are ready to start the game
+		cloneSounds();
+		startGame();
+	}
+	else {
+		updateProgressBar();
+	}
+}
+
+/**
  * load a single asset, setting onload to move on to the next asset
  */
 function loadSingleAsset() {
@@ -60,12 +85,7 @@ function loadSingleAsset() {
 		scripts[parsePath(requiredFiles[assetNum-1])] = object;
 		object = null;
 	}
-	//once we've loaded all the objects, we are ready to start the game
-	if (assetNum >= requiredFiles.length) {
-		cloneSounds();
-		return startGame();
-	}
-	
+
 	//get the element type from its file extension
 	let splitName = requiredFiles[assetNum].split(".");
 	let extension = splitName[splitName.length-1];
@@ -75,11 +95,11 @@ function loadSingleAsset() {
 	let elem = document.createElement(elemType);
 	//sounds have to be loaded a bit differently from images and scripts
 	if (elemType == "audio") {
-		elem.oncanplay = loadSingleAsset;
+		elem.oncanplay = incrementAssetCount;
 		elem.src = splitName[0] + (!(elem.canPlayType && elem.canPlayType('audio/ogg')) ? ".m4a" : ".ogg");
 	}
 	else {
-		elem.onload = loadSingleAsset;
+		elem.onload = incrementAssetCount;
 		elem.src = requiredFiles[assetNum];
 	}
 	
@@ -94,20 +114,4 @@ function loadSingleAsset() {
 	else {
 		sounds[parsePath(requiredFiles[assetNum])] = elem;
 	}
-	++assetNum;
-
-	//update loading item text and progress bar
-	//clear the lower portion of the canvas and update the loading status to display asset name
-	ctx.font = "30px Arial";
-	ctx.fillStyle = "black";
-	ctx.fillRect(0,cnv.height/2 + 100,cnv.width,cnv.height/2 + 100);
-	ctx.fillStyle = 'white';
-	ctx.fillText("loading " + splitName[0] + '.' + splitName[1],20,580);	
-
-
-	//draw loading bar
-	ctx.fillStyle = "gray";
-	ctx.fillRect(cnv.width/2-100,cnv.height/2+120,200,25);
-	ctx.fillStyle = "white";
-	ctx.fillRect(cnv.width/2-100,cnv.height/2+120,200*(assetNum/requiredFiles.length),25);
 }

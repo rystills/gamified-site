@@ -168,14 +168,20 @@ function getDistance(x1,y1,x2,y2) {
 }
 
 /**
- * check for a collision between objects a and b using AABBs
- * @param a: the first collision object
- * @param b: the second collision object
+ * check for a collision between two objects assuming AABBs
+ * @param x1: the center x coordinate of the first object
+ * @param y1: the center y coordinate of the first object
+ * @param w1: the width of the first object
+ * @param h1: the height of the first object
+ * @param x2: the center x coordinate of the second object
+ * @param y2: the center y coordinate of the second object
+ * @param w2: the width of the second object
+ * @param h2: the height of the second object
  * @returns whether there is a collision between the objects (true) or not (false)
  */
-function collisionRect(a,b) {
-	return (Math.abs(a.x - b.x) * 2 < (a.width + b.width)) &&
-    (Math.abs(a.y - b.y) * 2 < (a.height + b.height));
+function collisionRect(x1,y1,w1,h1,x2,y2,w2,h2) {
+	return (Math.abs(x1 - x2) * 2 < (w1 + w2)) &&
+    (Math.abs(y1 - y2) * 2 < (h1 + h2));
 }
 
 /**
