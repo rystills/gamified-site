@@ -1,4 +1,18 @@
 /**
+ * GameObject class: serves as the base class for all objects which will be represented in-game
+ * @param x: the starting center x coordinate
+ * @param y: the starting center y coordinate
+ * @param imgName: the name of our starting image (used for images dict lookup)
+ * @param rot: the starting rotation (in degrees)
+ */
+function GameObject(x,y,imgName,rot=0) {
+    this.x = x;
+    this.y = y;
+    this.rot = rot;
+    this.imgName = imgName;
+}
+
+/**
  * check if this GameObject is colliding with another GameObject via AABB
  * @param o: the other object we wish to check for collision with
  * @returns whethr or not we are colliding with GameObject o
@@ -25,15 +39,16 @@ GameObject.prototype.cy = function() {
 }
 
 /**
- * GameObject class: serves as the base class for all objects which will be represented in-game
- * @param {*} x: the starting x coordinate
- * @param {*} y: the starting y coordinate
- * @param {*} rot: the starting rotation (in degrees)
- * @param {*} imgName: the name of our starting image (used for images dict lookup)
+ * render this gameObject to the provided canvas
+ * @param cnv: the canvas on which to render
  */
-function GameObject(x,y,rot,imgName) {
-    this.x = x;
-    this.y = y;
-    this.rot = rot;
-    this.imgName = imgName;
+GameObject.prototype.render = function(ctx) {
+    drawCentered(this.imgName,ctx,this.x,this.y,this.rot);
+}
+
+/**
+ * stub method for children to override
+ */
+GameObject.prototype.update = function() {
+
 }

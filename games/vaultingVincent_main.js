@@ -17,6 +17,12 @@ function clearScreen() {
 function render() {
 	//clear all canvases for a fresh render
 	clearScreen();
+	//render tiles first
+	for (let i = 0; i < tiles.length; ++i) {
+		tiles[i].render(ctx);
+	}
+	//render player last
+	player.render(ctx);
 	//toggle off any one-frame event indicators at the end of the update tick
 	mousePressedLeft = false;
 	mousePressedRight = false;
@@ -28,6 +34,12 @@ function render() {
 function update() {
 	//update the deltaTime
 	updateTime();
+	//update tiles first
+	for (let i = 0; i < tiles.length; ++i) {
+		tiles[i].update();
+	}
+	//update player last
+	player.update();
 
 	//once all updates are out of the way, render the frame
 	render();
@@ -52,7 +64,10 @@ function loadAssets() {
 	//setup a global, ordered list of asset files to load
 	requiredFiles = [
 		"src\\util.js","src\\setupKeyListeners.js", //util functions
-		"src\\classes\\Enum.js", "src\\classes\\Button.js" //util classes
+		"src\\classes\\Enum.js", "src\\classes\\Button.js", //util classes
+		"vaultingVincent_images\\ground.png", "vaultingVincent_images\\player.png", //images
+		"vaultingVincent_src\\GameObject.js","vaultingVincent_src\\Enemy.js", //source files
+		"vaultingVincent_src\\Tile.js","vaultingVincent_src\\Player.js" //source files
 		];
 	
 	//manually load the asset loader
@@ -77,7 +92,9 @@ function initGlobals() {
 	totalTime = 0;
 
 	//demo data
-	tileLocs = [{x:10,y:10}];
+	player = new Player(300,300);
+	tiles = [];
+	tiles.push(new Tile(300,400,tileTypes.grassTop));
 }
 
 //disallow right-click context menu as right click functionality is often necessary for gameplay
