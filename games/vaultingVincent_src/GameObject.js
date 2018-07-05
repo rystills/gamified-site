@@ -41,6 +41,20 @@ GameObject.prototype.cx = function() {
 }
 
 /**
+ * move on the desired axis by the specified amount
+ * @param isXAxis: whether we wish to move on the x axis (true) or the y axis (false)
+ * @param amt: the amount by which to move
+ */
+GameObject.prototype.translate = function(isXAxis,amt) {
+    if (isXAxis) {
+        this.x += amt;
+    }
+    else {
+        this.y += amt;
+    }
+}
+
+/**
  * calculate our center y coordinate
  * @returns our center y coordinate
  */

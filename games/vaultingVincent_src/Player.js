@@ -23,6 +23,9 @@ function Player(x,y) {
     this.wallSliding = false;
     this.wallDir = "left";
     this.yVelSlide = 1;
+    this.wallJumpMaxTimer = 13;
+    this.wallJumpTimer = 0;
+    this.jumpPressed = false;
 }
 
 /**
@@ -33,27 +36,18 @@ function Player(x,y) {
  */
 Player.prototype.moveOutsideCollisions = function(isXAxis, moveSign, collidingObject = null) {
     let collisionResolved = false;
+    
     if (collidingObject != null) {
         if (this.collide(collidingObject)) {
             collisionResolved = true;
-            if (isXAxis) {
-                this.x += this.intersect(collidingObject).x * moveSign;
-            }
-            else {
-                this.y += this.intersect(collidingObject).y * moveSign;
-            }
+            this.translate(isXAxis,(isXAxis ? this.intersect(collidingObject).x : this.intersect(collidingObject).y) * moveSign);
         }
     }
     else {
         for (let i = 0; i < tiles.length; ++i) {
             if (tileProperties[tiles[i].type].state == tileStates.solid && this.collide(tiles[i])) {
                 collisionResolved = true;
-                if (isXAxis) {
-                    this.x += this.intersect(tiles[i]).x * moveSign;
-                }
-                else {
-                    this.y += this.intersect(tiles[i]).y * moveSign;
-                }
+                this.translate(isXAxis,(isXAxis ? this.intersect(tiles[i]).x : this.intersect(tiles[i]).y) * moveSign);
             }
         }
     }
@@ -85,13 +79,18 @@ Player.prototype.checkGrounded = function() {
  */
 Player.prototype.update = function() {
     //horizontal movement
-    if (keyStates["A"] || keyStates["D"]) {
-        this.xvel = clamp(this.xvel-(this.grounded ? this.xAccelGround : this.xAccelAir)*(keyStates["D"] ? -1 : 1), -this.xvelMax, this.xvelMax);
+    if (this.wallJumpTimer > 0) {
+        --this.wallJumpTimer;
     }
-    //horizontal deceleration
     else {
-        let xDecel = this.grounded ? this.xDecelGround : this.xDecelAir;
-        this.xvel -= Math.abs(this.xvel) <= (xDecel) ? this.xvel : Math.sign(this.xvel) * (xDecel);
+        if (keyStates["A"] || keyStates["D"]) {
+            this.xvel = clamp(this.xvel-(this.grounded ? this.xAccelGround : this.xAccelAir)*(keyStates["D"] ? -1 : 1), -this.xvelMax, this.xvelMax);
+        }
+        //horizontal deceleration
+        else {
+            let xDecel = this.grounded ? this.xDecelGround : this.xDecelAir;
+            this.xvel -= Math.abs(this.xvel) <= (xDecel) ? this.xvel : Math.sign(this.xvel) * (xDecel);
+        }
     }
 
     //apply final x velocity, stopping if we hit something
@@ -122,7 +121,8 @@ Player.prototype.update = function() {
     //update grounded state + allow jumping & walljumping
     this.checkGrounded();
     if (this.grounded || this.wallSliding) {
-        if (keyStates["W"]) {
+        this.wallJumpTimer = 0;
+        if (keyStates["W"] && !this.jumpPressed) {
             //jump
             if (this.grounded) {
                 this.yvel = -this.jumpVel;
@@ -131,9 +131,13 @@ Player.prototype.update = function() {
             else {
                 this.yvel = -this.wallJumpYVel;
                 this.xvel = -Math.sign(this.wallDir) * this.walljumpXVel;
+                this.wallJumpTimer = this.wallJumpMaxTimer;
             }
             this.grounded = false;
             this.wallSliding = false;
         }
     }
+
+    //update jump hold state to allow acting only on press
+    this.jumpPressed = keyStates["W"];
 }
