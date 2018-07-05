@@ -11,23 +11,25 @@ function Player(x,y) {
     this.xvel = 0;
     this.xAccelGround = 1;
     this.xAccelAir = .5;
-    this.xvelMax = 5;
-    this.yAccel = .4;
+    this.xvelMax = 6;
+    this.yAccel = .85;
     this.yVelMax = 10;
     this.jumpVel = 11;
     this.wallJumpYVel = 9;
-    this.walljumpXVel = 5;
+    this.walljumpXVel = 6;
     this.xDecelGround = 1;
     this.xDecelAir = 0;
     this.grounded = false;
     this.wallSliding = false;
     this.wallDir = "left";
     this.yVelSlide = 1;
-    this.wallJumpMaxTimer = 13;
-    this.wallJumpTimer = 0;
-    this.jumpMaxBuffer = 10;
+    this.wallJumpMaxVelocityTimer = 7;
+    this.wallJumpVelocityTimer = 0;
+    this.jumpMaxBuffer = 14;
     this.jumpBuffer = 0;
     this.jumpPressed = false;
+    this.jumpMaxHoldTimer = 10;
+    this.jumpHoldTimer = 0;
 }
 
 /**
@@ -73,6 +75,7 @@ Player.prototype.checkGrounded = function() {
     this.y -= 1;
     if (this.grounded) {
         this.yvel = 0;
+        this.jumpHoldTimer = 0;
     }
 }
 
@@ -81,11 +84,17 @@ Player.prototype.checkGrounded = function() {
  */
 Player.prototype.update = function() {
     //horizontal movement
+    if (this.jumpHoldTimer > 0) {
+        --this.jumpHoldTimer;
+        if (!keyStates["W"]) {
+            this.jumpHoldTimer = 0;
+        }
+    }
     if (this.jumpBuffer > 0) {
         --this.jumpBuffer;
     }
-    if (this.wallJumpTimer > 0) {
-        --this.wallJumpTimer;
+    if (this.wallJumpVelocityTimer > 0) {
+        --this.wallJumpVelocityTimer;
     }
     else {
         if (keyStates["A"] || keyStates["D"]) {
@@ -114,8 +123,8 @@ Player.prototype.update = function() {
     }
     
     //vertical movement
-    //apply gravity (unbounded rising speed, bounded falling speed)
-    this.yvel = clamp(this.yvel + this.yAccel, -Number.MAX_VALUE, this.yVelMax);
+    //apply gravity (unbounded rising speed with 1/2 reduction on button hold buffer, bounded falling speed)
+    this.yvel = clamp(this.yvel + this.yAccel * (keyStates["W"] && this.jumpHoldTimer > 0 ? .2 : 1), -Number.MAX_VALUE, this.yVelMax);
 
     //apply final y velocity, stopping if we hit something
     this.y += this.yvel;
@@ -126,10 +135,12 @@ Player.prototype.update = function() {
     //update grounded state + allow jumping & walljumping
     this.checkGrounded();
     if (this.grounded || this.wallSliding) {
-        this.wallJumpTimer = 0;
+        //reset jump timers when grounded or wall sliding
+        this.wallJumpVelocityTimer = 0;
         if (keyStates["W"] && this.jumpBuffer > 0) {
-            //disable jump buffer on successful jump
+            //reset jump buffer on successful jump
             this.jumpBuffer = 0;
+            this.jumpHoldTimer = this.jumpMaxHoldTimer;
             //jump
             if (this.grounded) {
                 this.yvel = -this.jumpVel;
@@ -138,7 +149,7 @@ Player.prototype.update = function() {
             else {
                 this.yvel = -this.wallJumpYVel;
                 this.xvel = -Math.sign(this.wallDir) * this.walljumpXVel;
-                this.wallJumpTimer = this.wallJumpMaxTimer;
+                this.wallJumpVelocityTimer = this.wallJumpMaxVelocityTimer;
             }
             this.grounded = false;
             this.wallSliding = false;
