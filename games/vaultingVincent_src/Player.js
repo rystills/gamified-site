@@ -25,6 +25,8 @@ function Player(x,y) {
     this.yVelSlide = 1;
     this.wallJumpMaxTimer = 13;
     this.wallJumpTimer = 0;
+    this.jumpMaxBuffer = 10;
+    this.jumpBuffer = 0;
     this.jumpPressed = false;
 }
 
@@ -79,6 +81,9 @@ Player.prototype.checkGrounded = function() {
  */
 Player.prototype.update = function() {
     //horizontal movement
+    if (this.jumpBuffer > 0) {
+        --this.jumpBuffer;
+    }
     if (this.wallJumpTimer > 0) {
         --this.wallJumpTimer;
     }
@@ -122,7 +127,9 @@ Player.prototype.update = function() {
     this.checkGrounded();
     if (this.grounded || this.wallSliding) {
         this.wallJumpTimer = 0;
-        if (keyStates["W"] && !this.jumpPressed) {
+        if (keyStates["W"] && this.jumpBuffer > 0) {
+            //disable jump buffer on successful jump
+            this.jumpBuffer = 0;
             //jump
             if (this.grounded) {
                 this.yvel = -this.jumpVel;
@@ -138,6 +145,11 @@ Player.prototype.update = function() {
         }
     }
 
-    //update jump hold state to allow acting only on press
+    //update jump buffer and hold state
+    if (!this.jumpPressed && keyStates["W"]) {
+        if (this.jumpMaxBuffer) {
+            this.jumpBuffer = this.jumpMaxBuffer;
+        }
+    }
     this.jumpPressed = keyStates["W"];
 }
