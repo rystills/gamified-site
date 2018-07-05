@@ -18,7 +18,17 @@ function GameObject(x,y,imgName,rot=0) {
  * @returns whethr or not we are colliding with GameObject o
  */
 GameObject.prototype.collide = function(o) {
-    return collisionRect(this.cx(),this.cy(),images[this.imgName].width,images[this.imgName].height,
+    return collisionRect(this.x,this.y,images[this.imgName].width,images[this.imgName].height,
+        o.x,o.y,images[o.imgName].width,images[o.imgName].height);
+}
+
+/**
+ * get the amount of intersection on each axis between this object and another GameObject via AABB
+ * @param o: the other object we wish to check for intersection with
+ * @returns the degree of intersection with object o on each axis
+ */
+GameObject.prototype.intersect = function(o) {
+    return intersectRectCenter(this.cx(),this.cy(),images[this.imgName].width,images[this.imgName].height,
         o.cx(),o.cy(),images[o.imgName].width,images[o.imgName].height);
 }
 
@@ -43,7 +53,7 @@ GameObject.prototype.cy = function() {
  * @param cnv: the canvas on which to render
  */
 GameObject.prototype.render = function(ctx) {
-    drawCentered(this.imgName,ctx,this.x,this.y,this.rot);
+    drawCentered(this.imgName,ctx,this.cx(),this.cy(),this.rot);
 }
 
 /**

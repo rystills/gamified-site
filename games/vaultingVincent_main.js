@@ -95,6 +95,12 @@ function initGlobals() {
 	player = new Player(300,300);
 	tiles = [];
 	tiles.push(new Tile(300,400,tileTypes.grassTop));
+	tiles.push(new Tile(300,464,tileTypes.grassTop));
+	tiles.push(new Tile(300,528,tileTypes.grassTop));
+	tiles.push(new Tile(236,528,tileTypes.grassTop));
+	tiles.push(new Tile(172,528,tileTypes.grassTop));
+	tiles.push(new Tile(364,528,tileTypes.grassTop));
+	tiles.push(new Tile(428,528,tileTypes.grassTop));
 }
 
 //disallow right-click context menu as right click functionality is often necessary for gameplay

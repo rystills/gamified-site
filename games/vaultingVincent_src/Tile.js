@@ -12,5 +12,5 @@ tileProperties[tileTypes.grassTop] = {imgName:"ground",state:tileStates.solid};
 makeChild("Tile","GameObject");
 function Tile(x,y,type) {
     this.type = type;
-    GameObject.call(this,x,y,tileProperties[tileTypes.grassTop].imgName);
+    GameObject.call(this,x,y,tileProperties[this.type].imgName);
 }

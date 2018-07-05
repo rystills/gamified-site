@@ -168,7 +168,7 @@ function getDistance(x1,y1,x2,y2) {
 }
 
 /**
- * check for a collision between two objects assuming AABBs
+ * check for a collision between two objects' centers assuming AABBs
  * @param x1: the center x coordinate of the first object
  * @param y1: the center y coordinate of the first object
  * @param w1: the width of the first object
@@ -179,10 +179,44 @@ function getDistance(x1,y1,x2,y2) {
  * @param h2: the height of the second object
  * @returns whether there is a collision between the objects (true) or not (false)
  */
-function collisionRect(x1,y1,w1,h1,x2,y2,w2,h2) {
+function collisionRectCenter(x1,y1,w1,h1,x2,y2,w2,h2) {
 	return (Math.abs(x1 - x2) * 2 < (w1 + w2)) &&
     (Math.abs(y1 - y2) * 2 < (h1 + h2));
 }
+
+/**
+ * find the amount of interseection between two objects on each axis using AABB
+ * @param x1: the center x coordinate of the first object
+ * @param y1: the center y coordinate of the first object
+ * @param w1: the width of the first object
+ * @param h1: the height of the first object
+ * @param x2: the center x coordinate of the second object
+ * @param y2: the center y coordinate of the second object
+ * @param w2: the width of the second object
+ * @param h2: the height of the second object
+ * @returns the amount of intersection between the two objects on each axis
+ */
+function intersectRectCenter(x1,y1,w1,h1,x2,y2,w2,h2) {
+	return {"x" : .5*((w1 + w2) - Math.abs(x1 - x2) * 2),
+    "y" : .5*((h1 + h2) - Math.abs(y1 - y2) * 2)};
+}
+
+/**
+ * check for a collision between two objects assuming AABBs
+ * @param x1: the x coordinate of the first object
+ * @param y1: the y coordinate of the first object
+ * @param w1: the width of the first object
+ * @param h1: the height of the first object
+ * @param x2: the x coordinate of the second object
+ * @param y2: the y coordinate of the second object
+ * @param w2: the width of the second object
+ * @param h2: the height of the second object
+ * @returns whether there is a collision between the objects (true) or not (false)
+ */
+function collisionRect(x1,y1,w1,h1,x2,y2,w2,h2) {
+	return (x1 < x2 + w2) && (x1 + w1 > x2) && (y1 < y2 + h2) && (y1 + h1 > y2);
+}
+
 
 /**
  * publish the current level to the server
