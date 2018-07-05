@@ -15,9 +15,14 @@ function Player(x,y) {
     this.yAccel = .4;
     this.yVelMax = 10;
     this.jumpVel = 11;
+    this.wallJumpYVel = 9;
+    this.walljumpXVel = 5;
     this.xDecelGround = 1;
     this.xDecelAir = 0;
-    let grounded = false;
+    this.grounded = false;
+    this.wallSliding = false;
+    this.wallDir = "left";
+    this.yVelSlide = 1;
 }
 
 /**
@@ -92,7 +97,16 @@ Player.prototype.update = function() {
     //apply final x velocity, stopping if we hit something
     this.x += this.xvel;
     if (this.moveOutsideCollisions(true,-Math.sign(this.xvel))) {
+        this.wallDir = Math.sign(this.xvel);
         this.xvel = 0;
+        this.wallSliding = true;
+        if (this.yvel >= this.yVelSlide) {
+            //maximum fall speed while wallsliding
+            this.yvel = this.yVelSlide;
+        }
+    }
+    else {
+        this.wallSliding = false;
     }
     
     //vertical movement
@@ -105,13 +119,21 @@ Player.prototype.update = function() {
         this.yvel = 0;
     }
 
-    //update grounded state + allow jumping
+    //update grounded state + allow jumping & walljumping
     this.checkGrounded();
-    if (this.grounded) {
+    if (this.grounded || this.wallSliding) {
         if (keyStates["W"]) {
             //jump
-            this.yvel = -this.jumpVel;
+            if (this.grounded) {
+                this.yvel = -this.jumpVel;
+            }
+            //walljump
+            else {
+                this.yvel = -this.wallJumpYVel;
+                this.xvel = -Math.sign(this.wallDir) * this.walljumpXVel;
+            }
             this.grounded = false;
+            this.wallSliding = false;
         }
     }
 }

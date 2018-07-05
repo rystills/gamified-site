@@ -101,6 +101,10 @@ function initGlobals() {
 	tiles.push(new Tile(172,528,tileTypes.grassTop));
 	tiles.push(new Tile(364,528,tileTypes.grassTop));
 	tiles.push(new Tile(428,528,tileTypes.grassTop));
+	for (let i = 0; i < 5; ++i) {
+		tiles.push(new Tile(172,528 - 64*i,tileTypes.grassTop));
+		tiles.push(new Tile(428,528 - 64*i,tileTypes.grassTop));
+	}
 }
 
 //disallow right-click context menu as right click functionality is often necessary for gameplay
