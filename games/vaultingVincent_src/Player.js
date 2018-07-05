@@ -10,7 +10,7 @@ function Player(x,y) {
     this.yvel = 0;
     this.xvel = 0;
     this.xAccelGround = 1;
-    this.xAccelAir = .5;
+    this.xAccelAir = .7;
     this.xvelMax = 6;
     this.yAccel = .85;
     this.yVelMax = 10;
@@ -23,13 +23,13 @@ function Player(x,y) {
     this.wallSliding = false;
     this.wallDir = "left";
     this.yVelSlide = 1;
-    this.wallJumpMaxVelocityTimer = 7;
+    this.wallJumpMaxVelocityTimer = 10;
     this.wallJumpVelocityTimer = 0;
-    this.jumpMaxBuffer = 14;
-    this.jumpBuffer = 0;
-    this.jumpPressed = false;
     this.jumpMaxHoldTimer = 10;
     this.jumpHoldTimer = 0;
+    this.jumpMaxBuffer = 15;
+    this.jumpBuffer = 0;
+    this.jumpPressed = false;
 }
 
 /**
@@ -83,20 +83,18 @@ Player.prototype.checkGrounded = function() {
  * update the player character
  */
 Player.prototype.update = function() {
+    //update jump buffer and hold state
+    if (!this.jumpPressed && keyStates["W"]) {
+        this.jumpBuffer = this.jumpMaxBuffer;
+    }
+    this.jumpPressed = keyStates["W"];
+
     //update timers
-    if (this.jumpHoldTimer > 0) {
-        --this.jumpHoldTimer;
-        if (!keyStates["W"]) {
-            this.jumpHoldTimer = 0;
-        }
-    }
-    if (this.jumpBuffer > 0) {
-        --this.jumpBuffer;
-    }
-    if (this.wallJumpVelocityTimer > 0) {
-        --this.wallJumpVelocityTimer;
-    }
-    else {
+    this.jumpHoldTimer = keyStates["W"] ? clamp(this.jumpHoldTimer - 1, 0, this.jumpMaxHoldTimer) : 0;
+    this.jumpBuffer = clamp(this.jumpBuffer-1, 0, this.jumpMaxBuffer);
+    this.wallJumpVelocityTimer = clamp(this.wallJumpVelocityTimer - 1, 0, this.wallJumpMaxVelocityTimer);
+    
+    if (this.wallJumpVelocityTimer == 0) {
         //horizontal movement (when not locked out by walljump timer)
         if (keyStates["A"] || keyStates["D"]) {
             this.xvel = clamp(this.xvel-(this.grounded ? this.xAccelGround : this.xAccelAir)*(keyStates["D"] ? -1 : 1), -this.xvelMax, this.xvelMax);
@@ -110,18 +108,13 @@ Player.prototype.update = function() {
 
     //apply final x velocity, stopping if we hit something
     this.x += this.xvel;
+    this.wallSliding = false;
     if (this.moveOutsideCollisions(true,-Math.sign(this.xvel))) {
         this.wallDir = Math.sign(this.xvel);
         this.xvel = 0;
         this.wallJumpVelocityTimer = 0;
         this.wallSliding = true;
-        if (this.yvel >= this.yVelSlide) {
-            //maximum fall speed while wallsliding
-            this.yvel = this.yVelSlide;
-        }
-    }
-    else {
-        this.wallSliding = false;
+        this.yvel = clamp(this.yvel,-Number.MAX_VALUE,this.yVelSlide);
     }
     
     //vertical movement
@@ -158,12 +151,4 @@ Player.prototype.update = function() {
             this.wallSliding = false;
         }
     }
-
-    //update jump buffer and hold state
-    if (!this.jumpPressed && keyStates["W"]) {
-        if (this.jumpMaxBuffer) {
-            this.jumpBuffer = this.jumpMaxBuffer;
-        }
-    }
-    this.jumpPressed = keyStates["W"];
 }
