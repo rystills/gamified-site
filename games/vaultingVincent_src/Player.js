@@ -21,10 +21,10 @@ function Player(x,y) {
 }
 
 /**
- * brute force move outside of any collisions in the specified axis
+ * move outside of all rect collisions on the specified axis
  * @param isXAxis: whether we wish to move on the x axis (true), or the y axis (false)
  * @param sign: the direction in which we wish to move (-1 or 1, given by Math.sign)
- * @param collidingObject: object to move outside of collision with. If left blank, all tiles are checked for collision instead.
+ * @param collidingObject: object to move outside of collision with. If left blank, all solid tiles are checked for collision instead
  */
 Player.prototype.moveOutsideCollisions = function(isXAxis, moveSign, collidingObject = null) {
     let collisionResolved = false;
@@ -41,15 +41,13 @@ Player.prototype.moveOutsideCollisions = function(isXAxis, moveSign, collidingOb
     }
     else {
         for (let i = 0; i < tiles.length; ++i) {
-            if (tileProperties[tiles[i].type].state == tileStates.solid) {
-                if (this.collide(tiles[i])) {
-                    collisionResolved = true;
-                    if (isXAxis) {
-                        this.x += this.intersect(tiles[i]).x * moveSign;
-                    }
-                    else {
-                        this.y += this.intersect(tiles[i]).y * moveSign;
-                    }
+            if (tileProperties[tiles[i].type].state == tileStates.solid && this.collide(tiles[i])) {
+                collisionResolved = true;
+                if (isXAxis) {
+                    this.x += this.intersect(tiles[i]).x * moveSign;
+                }
+                else {
+                    this.y += this.intersect(tiles[i]).y * moveSign;
                 }
             }
         }
@@ -70,6 +68,7 @@ Player.prototype.checkGrounded = function() {
             break;
         }
     }
+    //move back up and reset velocity if we are indeed grounded
     this.y -= 1;
     if (this.grounded) {
         this.yvel = 0;
@@ -86,12 +85,8 @@ Player.prototype.update = function() {
     }
     //horizontal deceleration
     else {
-        if (Math.abs(this.xvel) <= (this.grounded ? this.xDecelGround : this.xDecelAir)) {
-            this.xvel = 0;
-        }
-        else {
-            this.xvel -= Math.sign(this.xvel) * (this.grounded ? this.xDecelGround : this.xDecelAir);
-        }
+        let xDecel = this.grounded ? this.xDecelGround : this.xDecelAir;
+        this.xvel -= Math.abs(this.xvel) <= (xDecel) ? this.xvel : Math.sign(this.xvel) * (xDecel);
     }
 
     //apply final x velocity, stopping if we hit something
@@ -104,9 +99,11 @@ Player.prototype.update = function() {
     //apply gravity (unbounded rising speed, bounded falling speed)
     this.yvel = clamp(this.yvel + this.yAccel, -Number.MAX_VALUE, this.yVelMax);
 
-    //apply final y velocity
+    //apply final y velocity, stopping if we hit something
     this.y += this.yvel;
-    this.moveOutsideCollisions(false,-Math.sign(this.yvel));
+    if (this.moveOutsideCollisions(false,-Math.sign(this.yvel))) {
+        this.yvel = 0;
+    }
 
     //update grounded state + allow jumping
     this.checkGrounded();
