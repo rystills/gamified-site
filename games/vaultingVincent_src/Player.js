@@ -68,15 +68,12 @@ Player.prototype.checkGrounded = function() {
     for (let i = 0; i < tiles.length; ++i) {
         if (tileProperties[tiles[i].type].state == tileStates.solid && this.collide(tiles[i])) {
             this.grounded = true;
+            this.yvel = 0;
             break;
         }
     }
-    //move back up and reset velocity if we are indeed grounded
+    //move back up
     this.y -= 1;
-    if (this.grounded) {
-        this.yvel = 0;
-        this.jumpHoldTimer = 0;
-    }
 }
 
 /**
@@ -125,11 +122,16 @@ Player.prototype.update = function() {
     this.y += this.yvel;
     if (this.moveOutsideCollisions(false,-Math.sign(this.yvel))) {
         this.yvel = 0;
+    }
+    
+    //update grounded state
+    this.checkGrounded();
+
+    //reset jump hold timer if we're no longer moving up
+    if (this.yvel >= 0) {
         this.jumpHoldTimer = 0;
     }
 
-    //update grounded state + allow jumping & walljumping
-    this.checkGrounded();
     if (this.grounded || this.wallSliding) {
         //reset jump timers when grounded or wall sliding
         this.wallJumpVelocityTimer = 0;
