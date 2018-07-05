@@ -95,6 +95,7 @@ function initGlobals() {
 	player = new Player(300,300);
 	tiles = [];
 	tiles.push(new Tile(300,400,tileTypes.grassTop));
+	tiles.push(new Tile(300,200,tileTypes.grassTop));
 	tiles.push(new Tile(300,464,tileTypes.grassTop));
 	tiles.push(new Tile(300,528,tileTypes.grassTop));
 	tiles.push(new Tile(236,528,tileTypes.grassTop));

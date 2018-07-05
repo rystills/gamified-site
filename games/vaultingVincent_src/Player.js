@@ -83,7 +83,7 @@ Player.prototype.checkGrounded = function() {
  * update the player character
  */
 Player.prototype.update = function() {
-    //horizontal movement
+    //update timers
     if (this.jumpHoldTimer > 0) {
         --this.jumpHoldTimer;
         if (!keyStates["W"]) {
@@ -97,6 +97,7 @@ Player.prototype.update = function() {
         --this.wallJumpVelocityTimer;
     }
     else {
+        //horizontal movement (when not locked out by walljump timer)
         if (keyStates["A"] || keyStates["D"]) {
             this.xvel = clamp(this.xvel-(this.grounded ? this.xAccelGround : this.xAccelAir)*(keyStates["D"] ? -1 : 1), -this.xvelMax, this.xvelMax);
         }
@@ -112,6 +113,7 @@ Player.prototype.update = function() {
     if (this.moveOutsideCollisions(true,-Math.sign(this.xvel))) {
         this.wallDir = Math.sign(this.xvel);
         this.xvel = 0;
+        this.wallJumpVelocityTimer = 0;
         this.wallSliding = true;
         if (this.yvel >= this.yVelSlide) {
             //maximum fall speed while wallsliding
@@ -130,6 +132,7 @@ Player.prototype.update = function() {
     this.y += this.yvel;
     if (this.moveOutsideCollisions(false,-Math.sign(this.yvel))) {
         this.yvel = 0;
+        this.jumpHoldTimer = 0;
     }
 
     //update grounded state + allow jumping & walljumping
