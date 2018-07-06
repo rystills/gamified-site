@@ -67,9 +67,70 @@ Player.prototype.moveOutsideCollisions = function(isXAxis, moveSign, collidingOb
 }
 
 /**
+ * tick all timers down by one frame
+ */
+Player.prototype.tickTimers = function() {
+    this.jumpHoldTimer = keysDown["W"] ? clamp(this.jumpHoldTimer - 1, 0, this.jumpMaxHoldTimer) : 0;
+    this.jumpBuffer = clamp(this.jumpBuffer-1, 0, this.jumpMaxBuffer);
+    this.wallJumpVelocityTimer = clamp(this.wallJumpVelocityTimer - 1, 0, this.wallJumpMaxVelocityTimer);
+}
+
+/**
+ * apply acceleration and deceleration to horizontal movement, then update x position
+ */
+Player.prototype.updateHorizontalMovement = function() {
+    if (this.wallJumpVelocityTimer == 0) {
+        //horizontal movement (when not locked out by walljump timer)
+        if (keysDown["A"] || keysDown["D"]) {
+            this.xvel = clamp(this.xvel-(this.grounded ? this.xAccelGround : this.xAccelAir)*(keysDown["D"] ? -1 : 1), -this.xvelMax, this.xvelMax);
+        }
+        //horizontal deceleration
+        else {
+            let xDecel = this.grounded ? this.xDecelGround : this.xDecelAir;
+            this.xvel -= Math.abs(this.xvel) <= (xDecel) ? this.xvel : Math.sign(this.xvel) * (xDecel);
+        }
+    }
+    //apply resulting x velocity to x coordinate
+    this.x += this.xvel;
+}
+
+/**
+ * resolve any post-movement collisions on the x axis, potentially transitioning to wall slide state
+ */
+Player.prototype.evaluateHorizontalCollisions = function() {
+    this.wallSliding = false;
+    if (this.moveOutsideCollisions(true,-Math.sign(this.xvel))) {
+        this.wallDir = Math.sign(this.xvel);
+        this.xvel = 0;
+        this.wallJumpVelocityTimer = 0;
+        this.wallSliding = true;
+        this.yvel = clamp(this.yvel,-Number.MAX_VALUE,this.yVelSlide);
+    }
+}
+
+/**
+ * apply gravity to vertical movement, then update y position
+ */
+Player.prototype.updateVerticalMovement = function() {
+    //apply gravity (unbounded rising speed with 1/2 reduction on button hold buffer, bounded falling speed)
+    this.yvel = clamp(this.yvel + this.yAccel * (keysDown["W"] && this.jumpHoldTimer > 0 ? .2 : 1), -Number.MAX_VALUE, this.yVelMax);
+    //apply resulting y velocity to y coordinate
+    this.y += this.yvel;
+}
+
+/**
+ * resolve any post-movement collisions on the y axis
+ */
+Player.prototype.evaluateVerticalCollisions = function() {
+    if (this.moveOutsideCollisions(false,-Math.sign(this.yvel))) {
+        this.yvel = 0;
+    }
+}
+
+/**
  * checks whether the player is grounded. if they are, reset yvel and toggle grounded flag
  */
-Player.prototype.checkGrounded = function() {
+Player.prototype.updateGrounded = function() {
     //toggle grounded off and move down one pixel to see if the floor is below us
     this.grounded = false;
     this.y += 1;
@@ -84,61 +145,11 @@ Player.prototype.checkGrounded = function() {
     this.y -= 1;
 }
 
+
 /**
- * update the player character
+ * evaluate the player in the grounded or walljump state, processing potential jump commands
  */
-Player.prototype.update = function() {
-    //update jump buffer and hold state
-    if (keysPressed["W"]) {
-        this.jumpBuffer = this.jumpMaxBuffer;
-    }
-
-    //update timers
-    this.jumpHoldTimer = keysDown["W"] ? clamp(this.jumpHoldTimer - 1, 0, this.jumpMaxHoldTimer) : 0;
-    this.jumpBuffer = clamp(this.jumpBuffer-1, 0, this.jumpMaxBuffer);
-    this.wallJumpVelocityTimer = clamp(this.wallJumpVelocityTimer - 1, 0, this.wallJumpMaxVelocityTimer);
-    
-    if (this.wallJumpVelocityTimer == 0) {
-        //horizontal movement (when not locked out by walljump timer)
-        if (keysDown["A"] || keysDown["D"]) {
-            this.xvel = clamp(this.xvel-(this.grounded ? this.xAccelGround : this.xAccelAir)*(keysDown["D"] ? -1 : 1), -this.xvelMax, this.xvelMax);
-        }
-        //horizontal deceleration
-        else {
-            let xDecel = this.grounded ? this.xDecelGround : this.xDecelAir;
-            this.xvel -= Math.abs(this.xvel) <= (xDecel) ? this.xvel : Math.sign(this.xvel) * (xDecel);
-        }
-    }
-
-    //apply final x velocity, stopping if we hit something
-    this.x += this.xvel;
-    this.wallSliding = false;
-    if (this.moveOutsideCollisions(true,-Math.sign(this.xvel))) {
-        this.wallDir = Math.sign(this.xvel);
-        this.xvel = 0;
-        this.wallJumpVelocityTimer = 0;
-        this.wallSliding = true;
-        this.yvel = clamp(this.yvel,-Number.MAX_VALUE,this.yVelSlide);
-    }
-    
-    //vertical movement
-    //apply gravity (unbounded rising speed with 1/2 reduction on button hold buffer, bounded falling speed)
-    this.yvel = clamp(this.yvel + this.yAccel * (keysDown["W"] && this.jumpHoldTimer > 0 ? .2 : 1), -Number.MAX_VALUE, this.yVelMax);
-
-    //apply final y velocity, stopping if we hit something
-    this.y += this.yvel;
-    if (this.moveOutsideCollisions(false,-Math.sign(this.yvel))) {
-        this.yvel = 0;
-    }
-    
-    //update grounded state
-    this.checkGrounded();
-
-    //reset jump hold timer if we're no longer moving up
-    if (this.yvel >= 0) {
-        this.jumpHoldTimer = 0;
-    }
-
+Player.prototype.evaluateGrounded = function() {
     if (this.grounded || this.wallSliding) {
         //reset walljump timer when grounded or wall sliding
         this.wallJumpVelocityTimer = 0;
@@ -160,4 +171,21 @@ Player.prototype.update = function() {
             this.wallSliding = false;
         }
     }
+}
+
+/**
+ * update the player character
+ */
+Player.prototype.update = function() {
+    this.tickTimers();
+    //reset jump buffer on jump key press
+    this.jumpBuffer = keysPressed["W"] ? this.jumpMaxBuffer : this.jumpBuffer;
+    this.updateHorizontalMovement();
+    this.evaluateHorizontalCollisions();
+    this.updateVerticalMovement();
+    this.evaluateVerticalCollisions();
+    this.updateGrounded();
+    //reset jump hold timer if we're no longer moving up
+    this.jumpHoldTimer = this.yvel >= 0 ? 0 : this.jumpHoldTimer;
+    this.evaluateGrounded();
 }
