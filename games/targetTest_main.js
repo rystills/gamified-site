@@ -72,8 +72,7 @@ function render() {
 		}
 	}
 	//toggle off any one-frame event indicators at the end of the update tick
-	mousePressedLeft = false;
-	mousePressedRight = false;
+	resetPressedKeys();
 }
 
 /**
@@ -504,12 +503,12 @@ function winGame() {
 function updatePlayer() {
 	//movement
 	if (fuel > 0) {
-		if (keyStates["A"] && playerPos.x > minPlayerPos) {
+		if (keysDown["A"] && playerPos.x > minPlayerPos) {
 			calcPlayerPosRot(playerPos.x-1, false);
 			fuel-=.4;
 			sounds["move"].play();
 		}
-		else if (keyStates["D"] && playerPos.x < cnv.width - minPlayerPos) {
+		else if (keysDown["D"] && playerPos.x < cnv.width - minPlayerPos) {
 			calcPlayerPosRot(playerPos.x+1, false);
 			fuel-=.4;
 			sounds["move"].play()

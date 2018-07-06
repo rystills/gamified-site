@@ -2,13 +2,17 @@
  * create a list of keystates, maintained by event listeners
  */
 function setupKeyListeners() {
-	keyStates = [];
+	keysDown = {};
+	keysPressed = {};
 	//add keydown and keyup events for all keys
 	document.body.addEventListener("keydown", function (e) {
-		keyStates[String.fromCharCode(e.keyCode)] = true;
+		if (!keysDown[String.fromCharCode(e.keyCode)]) {
+			keysPressed[String.fromCharCode(e.keyCode)] = true;
+		}
+		keysDown[String.fromCharCode(e.keyCode)] = true;
 	});
 	document.body.addEventListener("keyup", function (e) {
-		keyStates[String.fromCharCode(e.keyCode)] = false;
+		keysDown[String.fromCharCode(e.keyCode)] = false;
 	});
 	
 	//mouse event listeners (down is triggered every frame, pressed is only triggered on the first frame)
@@ -45,6 +49,17 @@ function setupKeyListeners() {
 			//right click release detected
 			mouseDownRight = false;
 		}
+	});
+}
+
+/**
+ * reset pressed keys; to be called at the end of each update tick to ensure presses are only registered for a single frame
+ */
+function resetPressedKeys() {
+	mousePressedLeft = false;
+	mousePressedRight = false;
+	Object.keys(keysPressed).forEach(function (key) {
+		keysPressed[key] = false;
 	});
 }
 

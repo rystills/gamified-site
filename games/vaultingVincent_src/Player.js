@@ -23,6 +23,7 @@ function Player(x,y) {
     this.wallSliding = false;
     this.wallDir = "left";
     this.yVelSlide = 1;
+    
     this.wallJumpMaxVelocityTimer = 10;
     this.wallJumpVelocityTimer = 0;
     this.jumpMaxHoldTimer = 10;
@@ -30,6 +31,13 @@ function Player(x,y) {
     this.jumpMaxBuffer = 15;
     this.jumpBuffer = 0;
     this.jumpPressed = false;
+
+    this.dashing = false;
+    this.canDash = true;
+    this.dashMaxBuffer = 12;
+    this.dashBuffer = 0;
+    this.dashMaxTimer = 15;
+    this.dashTimer = 0;
 }
 
 /**
@@ -81,20 +89,19 @@ Player.prototype.checkGrounded = function() {
  */
 Player.prototype.update = function() {
     //update jump buffer and hold state
-    if (!this.jumpPressed && keyStates["W"]) {
+    if (keysPressed["W"]) {
         this.jumpBuffer = this.jumpMaxBuffer;
     }
-    this.jumpPressed = keyStates["W"];
 
     //update timers
-    this.jumpHoldTimer = keyStates["W"] ? clamp(this.jumpHoldTimer - 1, 0, this.jumpMaxHoldTimer) : 0;
+    this.jumpHoldTimer = keysDown["W"] ? clamp(this.jumpHoldTimer - 1, 0, this.jumpMaxHoldTimer) : 0;
     this.jumpBuffer = clamp(this.jumpBuffer-1, 0, this.jumpMaxBuffer);
     this.wallJumpVelocityTimer = clamp(this.wallJumpVelocityTimer - 1, 0, this.wallJumpMaxVelocityTimer);
     
     if (this.wallJumpVelocityTimer == 0) {
         //horizontal movement (when not locked out by walljump timer)
-        if (keyStates["A"] || keyStates["D"]) {
-            this.xvel = clamp(this.xvel-(this.grounded ? this.xAccelGround : this.xAccelAir)*(keyStates["D"] ? -1 : 1), -this.xvelMax, this.xvelMax);
+        if (keysDown["A"] || keysDown["D"]) {
+            this.xvel = clamp(this.xvel-(this.grounded ? this.xAccelGround : this.xAccelAir)*(keysDown["D"] ? -1 : 1), -this.xvelMax, this.xvelMax);
         }
         //horizontal deceleration
         else {
@@ -116,7 +123,7 @@ Player.prototype.update = function() {
     
     //vertical movement
     //apply gravity (unbounded rising speed with 1/2 reduction on button hold buffer, bounded falling speed)
-    this.yvel = clamp(this.yvel + this.yAccel * (keyStates["W"] && this.jumpHoldTimer > 0 ? .2 : 1), -Number.MAX_VALUE, this.yVelMax);
+    this.yvel = clamp(this.yvel + this.yAccel * (keysDown["W"] && this.jumpHoldTimer > 0 ? .2 : 1), -Number.MAX_VALUE, this.yVelMax);
 
     //apply final y velocity, stopping if we hit something
     this.y += this.yvel;
@@ -133,9 +140,9 @@ Player.prototype.update = function() {
     }
 
     if (this.grounded || this.wallSliding) {
-        //reset jump timers when grounded or wall sliding
+        //reset walljump timer when grounded or wall sliding
         this.wallJumpVelocityTimer = 0;
-        if (keyStates["W"] && this.jumpBuffer > 0) {
+        if (keysDown["W"] && this.jumpBuffer > 0) {
             //reset jump buffer on successful jump
             this.jumpBuffer = 0;
             this.jumpHoldTimer = this.jumpMaxHoldTimer;

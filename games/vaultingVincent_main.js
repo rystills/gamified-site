@@ -24,8 +24,7 @@ function render() {
 	//render player last
 	player.render(ctx);
 	//toggle off any one-frame event indicators at the end of the update tick
-	mousePressedLeft = false;
-	mousePressedRight = false;
+	resetPressedKeys();
 }
 
 /**
