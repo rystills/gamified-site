@@ -101,20 +101,39 @@ Player.prototype.updateHorizontalMovement = function() {
 }
 
 /**
+ * determine whether or not the player is next to a wall in the specified direction
+ * @param dir: the direction on the x axis in which to check for a wall
+ * @returns whether or not the player is next to a wall in the specified direction
+ */
+Player.prototype.nextToWall = function(dir) {
+    this.x += (dir == "left" ? -1 : 1);
+    let wallFound = false;
+    for (let i = 0; i < tiles.length; ++i) {
+        if (this.collide(tiles[i])) {
+            wallFound = true;
+            break;
+        }
+    }
+    this.x -= (dir == "left" ? -1 : 1);
+    return wallFound
+}
+
+/**
  * resolve any post-movement collisions on the x axis, potentially transitioning to wall slide state
  */
 Player.prototype.evaluateHorizontalCollisions = function() {
-    //activate a wall slide if we move into a wall while holding the directional button
-    this.wallSliding = (this.moveOutsideCollisions(true,-Math.sign(this.xvel)) && 
-    (Math.sign(this.xvel) == 1 && keysDown["D"] || Math.sign(this.xvel) == -1 && keysDown["A"]))
-     || (this.wallSliding && (this.xvel == 0));
-    if (this.wallSliding) {
-        if (this.xvel != 0) {
-            this.wallDir = this.xvel < 0 ? "left" : "right";
-        }
-        this.xvel = 0;
+    let colResolved = this.moveOutsideCollisions(true,-Math.sign(this.xvel));
+    if (colResolved) {
+        this.wallDir = this.xvel < 0 ? "left" : "right"
         this.wallJumpVelocityTimer = 0;
+        this.xvel = 0;
         this.dashTimer = 0;
+    }
+    //wall slide if we move into a wall while holding the corresponding directional button, or if we're already sliding on a wall with 0 velocity
+    this.wallSliding = (colResolved && (this.wallDir == "right" && keysDown["D"] || this.wallDir == "left" && keysDown["A"])) || 
+    (this.wallSliding && (this.xvel == 0) && this.nextToWall(this.wallDir));
+    if (this.wallSliding) {
+        this.xvel = 0;
         this.yvel = clamp(this.yvel,-Number.MAX_VALUE,this.yVelSlide);
     }
 }
