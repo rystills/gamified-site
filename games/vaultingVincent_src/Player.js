@@ -98,6 +98,11 @@ Player.prototype.updateHorizontalMovement = function() {
     }
     //apply resulting x velocity to x coordinate
     this.x += this.xvel;
+    if (this.grounded && (this.xvel != 0)) {
+        //spawn running particles
+        this.spawnParticles(10,this.cx() - images[this.imgName].width/2,this.cx() + images[this.imgName].width/2,
+        this.cy() +  images[this.imgName].height/4, this.cy() +  images[this.imgName].height/2, 10,"255,255,255",3,this.xvel/16,-.1);
+    }
 }
 
 /**
@@ -141,14 +146,8 @@ Player.prototype.evaluateHorizontalCollisions = function() {
             this.xvel = 0;
             this.yvel = clamp(this.yvel,-Number.MAX_VALUE,this.yVelSlide);
             //spawn wall particles
-            let cx = this.cx();
-            let cy = this.cy();
-            let hw = images[this.imgName].width/2;
-            let hh = images[this.imgName].height/2;
-            let partYChange = this.yvel/16;
-            for (let i = 0; i < 10; ++i) {
-                particles.push(new Particle(getRandomInt(cx-hw,cx+hw),getRandomInt(cy-hh,cy+hh),15,"200,255,0",4,0,partYChange,true));
-            }
+            this.spawnParticles(10,this.cx() - images[this.imgName].width/2 * (this.wallDir == "left" ? 1 : -1),this.cx() - images[this.imgName].width/4 * (this.wallDir == "left" ? 1 : -1),
+            this.cy() -  images[this.imgName].height/2, this.cy() +  images[this.imgName].height/2, 15,"200,255,0",4,0,this.yvel/16);
         }
     }
 }
@@ -195,14 +194,8 @@ Player.prototype.updateGrounded = function() {
     
     if (this.grounded && !wasGrounded) {
         //spawn land particles
-        let cx = this.cx();
-        let cy = this.cy();
-        let hw = images[this.imgName].width/2;
-        let hh = images[this.imgName].height/2;
-        let partXChange = this.xvel/16;
-        for (let i = 0; i < 10; ++i) {
-            particles.push(new Particle(getRandomInt(cx-hw,cx+hw),getRandomInt(cy,cy+hh),30,"255,255,255",8,partXChange,.2,true));
-        }
+        this.spawnParticles(10,this.cx() - images[this.imgName].width/2,this.cx() + images[this.imgName].width/2,
+        this.cy(), this.cy() +  images[this.imgName].height/2, 30,"255,255,255",8,this.xvel/16,.2);
     }
 }
 
@@ -231,14 +224,8 @@ Player.prototype.evaluateGroundedOptions = function() {
             this.grounded = false;
             this.wallSliding = false;
             //spawn jump particles
-            let cx = this.cx();
-            let cy = this.cy();
-            let hw = images[this.imgName].width/2;
-            let hh = images[this.imgName].height/2;
-            let partXChange = this.xvel/16;
-            for (let i = 0; i < 10; ++i) {
-                particles.push(new Particle(getRandomInt(cx-hw,cx+hw),getRandomInt(cy-(this.wallJumpVelocityTimer==0 ? 0 : hh),cy+hh),30,"255,255,255",8,partXChange,-.2,true));
-            }
+            this.spawnParticles(10,this.cx() - images[this.imgName].width/2,this.cx() + images[this.imgName].width/2,
+            this.cy() - (this.wallJumpVelocityTimer==0 ? 0 : images[this.imgName].height/2), this.cy() +  images[this.imgName].height/2, 30,"255,255,255",8,this.xvel/16,-.2);
         }
     }
 }
@@ -272,6 +259,25 @@ Player.prototype.evaluateDash = function() {
 }
 
 /**
+ * spawn the desired number of particles with the specified attributes
+ * @param numParts: the number of particles to spawn
+ * @param minX: the minimum x position for the particles
+ * @param maxX: the maximum x position for the particles
+ * @param minY: the minimum y position for the particles
+ * @param maxY: the maximum y position for the particles
+ * @param life: the frame duration of the particles
+ * @param color: the rgb color of the particles
+ * @param radius: the radius of the particles
+ * @param xChange: the amount by which to change each particle's x coordinate each frame
+ * @param yChange: the amount by which to change each particle's y coordinate each frame
+ */
+Player.prototype.spawnParticles = function(numParts,minX,maxX,minY,maxY,life,color,radius,xChange,yChange) {
+        for (let i = 0; i < numParts; ++i) {
+            particles.push(new Particle(getRandomInt(minX,maxX),getRandomInt(minY,maxY),life,color,radius,xChange,yChange,true));
+        }
+}
+
+/**
  * update the player's dash
  */
 Player.prototype.updateDash = function() {
@@ -279,14 +285,8 @@ Player.prototype.updateDash = function() {
         this.xvel = (this.dashDir == "left" ? -1 : 1) * this.dashVel;
         this.yvel = 0;
         //spawn dash particles
-        let cx = this.cx();
-        let cy = this.cy();
-        let hw = images[this.imgName].width/2;
-        let hh = images[this.imgName].height/2;
-        let partXChange = this.xvel/16;
-        for (let i = 0; i < 10; ++i) {
-            particles.push(new Particle(getRandomInt(cx-hw,cx+hw),getRandomInt(cy-hh,cy+hh),30,"255,255,255",2,partXChange,0,true));
-        }
+        this.spawnParticles(10,this.cx() - images[this.imgName].width/2,this.cx() + images[this.imgName].width/2,
+        this.cy() -  images[this.imgName].height/2, this.cy() +  images[this.imgName].height/2, 30,"255,255,255",2,this.xvel/16,0);
     }
 }
 
