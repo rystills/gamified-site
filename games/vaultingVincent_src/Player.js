@@ -129,12 +129,18 @@ Player.prototype.evaluateHorizontalCollisions = function() {
         this.xvel = 0;
         this.dashTimer = 0;
     }
-    //wall slide if we move into a wall while holding the corresponding directional button, or if we're already sliding on a wall with 0 velocity
-    this.wallSliding = (colResolved && (this.wallDir == "right" && keysDown["D"] || this.wallDir == "left" && keysDown["A"])) || 
-    (this.wallSliding && (this.xvel == 0) && this.nextToWall(this.wallDir));
-    if (this.wallSliding) {
-        this.xvel = 0;
-        this.yvel = clamp(this.yvel,-Number.MAX_VALUE,this.yVelSlide);
+    //stop wall sliding if we press down
+    if (keysDown["S"]) {
+        this.wallSliding = false;
+    }
+    else {
+        //wall slide if we move into a wall while holding the corresponding directional button, or if we're already sliding on a wall with 0 velocity
+        this.wallSliding = (colResolved && (this.wallDir == "right" && keysDown["D"] || this.wallDir == "left" && keysDown["A"])) || 
+        (this.wallSliding && (this.xvel == 0) && this.nextToWall(this.wallDir));
+        if (this.wallSliding) {
+            this.xvel = 0;
+            this.yvel = clamp(this.yvel,-Number.MAX_VALUE,this.yVelSlide);
+        }
     }
 }
 
