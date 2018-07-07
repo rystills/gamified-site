@@ -21,6 +21,10 @@ function render() {
 	for (let i = 0; i < tiles.length; ++i) {
 		tiles[i].render(ctx);
 	}
+	//render particles next
+	for (let i = 0; i < particles.length; ++i) {
+		particles[i].render(ctx);
+	}
 	//render player last
 	player.render(ctx);
 	//toggle off any one-frame event indicators at the end of the update tick
@@ -36,6 +40,15 @@ function update() {
 	//update tiles first
 	for (let i = 0; i < tiles.length; ++i) {
 		tiles[i].update();
+	}
+	//update particles next, removing particles once they've expired
+	for (let i = 0; i < particles.length; ++i) {
+		particles[i].update();
+		if (particles[i].life == 0) {
+			particles.splice(i,1);
+			--i;
+			continue;
+		}
 	}
 	//update player last
 	player.update();
@@ -66,7 +79,7 @@ function loadAssets() {
 		"src\\classes\\Enum.js", "src\\classes\\Button.js", //util classes
 		"vaultingVincent_images\\ground.png", "vaultingVincent_images\\player.png", //images
 		"vaultingVincent_src\\GameObject.js","vaultingVincent_src\\Enemy.js", //source files
-		"vaultingVincent_src\\Tile.js","vaultingVincent_src\\Player.js" //source files
+		"vaultingVincent_src\\Tile.js","vaultingVincent_src\\Particle.js","vaultingVincent_src\\Player.js" //source files
 		];
 	
 	//manually load the asset loader
@@ -89,6 +102,7 @@ function initGlobals() {
 	prevTime = Date.now();
 	deltaTime = 0;
 	totalTime = 0;
+	particles = [];
 
 	//demo data
 	player = new Player(300,300);

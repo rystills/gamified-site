@@ -247,6 +247,15 @@ Player.prototype.updateDash = function() {
     if (this.dashTimer > 0) {
         this.xvel = (this.dashDir == "left" ? -1 : 1) * this.dashVel;
         this.yvel = 0;
+        //spawn dash particles
+        let cx = this.cx();
+        let cy = this.cy();
+        let hw = images[this.imgName].width/2;
+        let hh = images[this.imgName].height/2;
+        let partXChange = this.xvel/16;
+        for (let i = 0; i < 10; ++i) {
+            particles.push(new Particle(getRandomInt(cx-hw,cx+hw),getRandomInt(cy-hh,cy+hh),30,fadeOut=true,xChange = partXChange));
+        }
     }
 }
 
