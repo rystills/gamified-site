@@ -135,11 +135,20 @@ Player.prototype.evaluateHorizontalCollisions = function() {
     }
     else {
         //wall slide if we move into a wall while holding the corresponding directional button, or if we're already sliding on a wall with 0 velocity
-        this.wallSliding = (colResolved && (this.wallDir == "right" && keysDown["D"] || this.wallDir == "left" && keysDown["A"])) || 
-        (this.wallSliding && (this.xvel == 0) && this.nextToWall(this.wallDir));
+        this.wallSliding = !this.grounded && ((colResolved && (this.wallDir == "right" && keysDown["D"] || this.wallDir == "left" && keysDown["A"])) || 
+        (this.wallSliding && (this.xvel == 0) && this.nextToWall(this.wallDir)));
         if (this.wallSliding) {
             this.xvel = 0;
             this.yvel = clamp(this.yvel,-Number.MAX_VALUE,this.yVelSlide);
+            //spawn wall particles
+            let cx = this.cx();
+            let cy = this.cy();
+            let hw = images[this.imgName].width/2;
+            let hh = images[this.imgName].height/2;
+            let partYChange = this.yvel/16;
+            for (let i = 0; i < 10; ++i) {
+                particles.push(new Particle(getRandomInt(cx-hw,cx+hw),getRandomInt(cy-hh,cy+hh),15,"200,255,0",4,0,partYChange,true));
+            }
         }
     }
 }
@@ -170,6 +179,7 @@ Player.prototype.evaluateVerticalCollisions = function() {
  */
 Player.prototype.updateGrounded = function() {
     //toggle grounded off and move down one pixel to see if the floor is below us
+    let wasGrounded = this.grounded;
     this.grounded = false;
     this.y += 1;
     for (let i = 0; i < tiles.length; ++i) {
@@ -182,6 +192,18 @@ Player.prototype.updateGrounded = function() {
     }
     //move back up
     this.y -= 1;
+    
+    if (this.grounded && !wasGrounded) {
+        //spawn land particles
+        let cx = this.cx();
+        let cy = this.cy();
+        let hw = images[this.imgName].width/2;
+        let hh = images[this.imgName].height/2;
+        let partXChange = this.xvel/16;
+        for (let i = 0; i < 10; ++i) {
+            particles.push(new Particle(getRandomInt(cx-hw,cx+hw),getRandomInt(cy,cy+hh),30,"255,255,255",8,partXChange,.2,true));
+        }
+    }
 }
 
 
@@ -208,6 +230,15 @@ Player.prototype.evaluateGroundedOptions = function() {
             }
             this.grounded = false;
             this.wallSliding = false;
+            //spawn jump particles
+            let cx = this.cx();
+            let cy = this.cy();
+            let hw = images[this.imgName].width/2;
+            let hh = images[this.imgName].height/2;
+            let partXChange = this.xvel/16;
+            for (let i = 0; i < 10; ++i) {
+                particles.push(new Particle(getRandomInt(cx-hw,cx+hw),getRandomInt(cy-(this.wallJumpVelocityTimer==0 ? 0 : hh),cy+hh),30,"255,255,255",8,partXChange,-.2,true));
+            }
         }
     }
 }
@@ -254,7 +285,7 @@ Player.prototype.updateDash = function() {
         let hh = images[this.imgName].height/2;
         let partXChange = this.xvel/16;
         for (let i = 0; i < 10; ++i) {
-            particles.push(new Particle(getRandomInt(cx-hw,cx+hw),getRandomInt(cy-hh,cy+hh),30,fadeOut=true,xChange = partXChange));
+            particles.push(new Particle(getRandomInt(cx-hw,cx+hw),getRandomInt(cy-hh,cy+hh),30,"255,255,255",2,partXChange,0,true));
         }
     }
 }
