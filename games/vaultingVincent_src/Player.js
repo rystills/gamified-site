@@ -46,6 +46,7 @@ function Player(x,y) {
  * @param isXAxis: whether we wish to move on the x axis (true), or the y axis (false)
  * @param sign: the direction in which we wish to move (-1 or 1, given by Math.sign)
  * @param collidingObject: object to move outside of collision with. If left blank, all solid tiles are checked for collision instead
+ * @returns whether a collision was found and resolved or not
  */
 Player.prototype.moveOutsideCollisions = function(isXAxis, moveSign, collidingObject = null) {
     let collisionResolved = false;
@@ -103,12 +104,16 @@ Player.prototype.updateHorizontalMovement = function() {
  * resolve any post-movement collisions on the x axis, potentially transitioning to wall slide state
  */
 Player.prototype.evaluateHorizontalCollisions = function() {
-    this.wallSliding = false;
-    if (this.moveOutsideCollisions(true,-Math.sign(this.xvel))) {
-        this.wallDir = Math.sign(this.xvel);
+    //activate a wall slide if we move into a wall while holding the directional button
+    this.wallSliding = (this.moveOutsideCollisions(true,-Math.sign(this.xvel)) && 
+    (Math.sign(this.xvel) == 1 && keysDown["D"] || Math.sign(this.xvel) == -1 && keysDown["A"]))
+     || (this.wallSliding && (this.xvel == 0));
+    if (this.wallSliding) {
+        if (this.xvel != 0) {
+            this.wallDir = this.xvel < 0 ? "left" : "right";
+        }
         this.xvel = 0;
         this.wallJumpVelocityTimer = 0;
-        this.wallSliding = true;
         this.dashTimer = 0;
         this.yvel = clamp(this.yvel,-Number.MAX_VALUE,this.yVelSlide);
     }
@@ -173,7 +178,7 @@ Player.prototype.evaluateGroundedOptions = function() {
             //walljump
             else {
                 this.yvel = -this.wallJumpYVel;
-                this.xvel = -Math.sign(this.wallDir) * this.walljumpXVel;
+                this.xvel = (this.wallDir == "left" ? 1 : -1) * this.walljumpXVel;
                 this.wallJumpVelocityTimer = this.wallJumpMaxVelocityTimer;
             }
             this.grounded = false;
