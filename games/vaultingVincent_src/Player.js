@@ -5,7 +5,7 @@
  */
 makeChild("Player","GameObject");
 function Player(x,y) {
-    GameObject.call(this,x,y,"player");
+    GameObject.call(this,x,y,"player",100,100);
     //movement properties
     this.yvel = 0;
     this.xvel = 0;
@@ -58,10 +58,10 @@ Player.prototype.moveOutsideCollisions = function(isXAxis, moveSign, collidingOb
         }
     }
     else {
-        for (let i = 0; i < tiles.length; ++i) {
-            if (tileProperties[tiles[i].type].state == tileStates.solid && this.collide(tiles[i])) {
+        for (let i = 0; i < activeRoom.tiles.length; ++i) {
+            if (tileProperties[activeRoom.tiles[i].type].state == tileStates.solid && this.collide(activeRoom.tiles[i])) {
                 collisionResolved = true;
-                this.translate(isXAxis,(isXAxis ? this.intersect(tiles[i]).x : this.intersect(tiles[i]).y) * moveSign);
+                this.translate(isXAxis,(isXAxis ? this.intersect(activeRoom.tiles[i]).x : this.intersect(activeRoom.tiles[i]).y) * moveSign);
             }
         }
     }
@@ -85,7 +85,7 @@ Player.prototype.tickTimers = function() {
 Player.prototype.updateHorizontalMovement = function() {
     if (this.wallJumpVelocityTimer == 0 && this.dashTimer == 0) {
         //horizontal movement (when not locked out by walljump timer)
-        if (keysDown["A"] || keysDown["D"]) {
+        if ((keysDown["A"] || keysDown["D"]) && !(keysDown["A"] && keysDown["D"])) {
             this.xvel = clamp(this.xvel-(this.grounded ? this.xAccelGround : this.xAccelAir)*(keysDown["D"] ? -1 : 1), -this.xvelMax, this.xvelMax);
         }
         //horizontal deceleration
@@ -98,7 +98,7 @@ Player.prototype.updateHorizontalMovement = function() {
     }
     //apply resulting x velocity to x coordinate
     this.x += this.xvel;
-    if (this.grounded && (this.xvel != 0)) {
+    if (this.grounded && (Math.abs(this.xvel) > 1)) {
         //spawn running particles
         this.spawnParticles(10,this.cx() - images[this.imgName].width/2,this.cx() + images[this.imgName].width/2,
         this.cy() +  images[this.imgName].height/4, this.cy() +  images[this.imgName].height/2, 10,"255,255,255",3,this.xvel/16,-.1);
@@ -113,8 +113,8 @@ Player.prototype.updateHorizontalMovement = function() {
 Player.prototype.nextToWall = function(dir) {
     this.x += (dir == "left" ? -1 : 1);
     let wallFound = false;
-    for (let i = 0; i < tiles.length; ++i) {
-        if (this.collide(tiles[i])) {
+    for (let i = 0; i < activeRoom.tiles.length; ++i) {
+        if (this.collide(activeRoom.tiles[i])) {
             wallFound = true;
             break;
         }
@@ -181,8 +181,8 @@ Player.prototype.updateGrounded = function() {
     let wasGrounded = this.grounded;
     this.grounded = false;
     this.y += 1;
-    for (let i = 0; i < tiles.length; ++i) {
-        if (tileProperties[tiles[i].type].state == tileStates.solid && this.collide(tiles[i])) {
+    for (let i = 0; i < activeRoom.tiles.length; ++i) {
+        if (tileProperties[activeRoom.tiles[i].type].state == tileStates.solid && this.collide(activeRoom.tiles[i])) {
             this.grounded = true;
             this.canDash = true;
             this.yvel = 0;
@@ -273,7 +273,7 @@ Player.prototype.evaluateDash = function() {
  */
 Player.prototype.spawnParticles = function(numParts,minX,maxX,minY,maxY,life,color,radius,xChange,yChange) {
         for (let i = 0; i < numParts; ++i) {
-            particles.push(new Particle(getRandomInt(minX,maxX),getRandomInt(minY,maxY),life,color,radius,xChange,yChange,true));
+            rmPlay.addParticle(new Particle(getRandomInt(minX,maxX),getRandomInt(minY,maxY),life,color,radius,xChange,yChange,true));
         }
 }
 

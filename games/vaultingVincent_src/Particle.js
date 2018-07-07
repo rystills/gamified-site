@@ -11,8 +11,7 @@
  */
 makeChild("Particle","GameObject");
 function Particle(x,y,life,color,radius,xChange, yChange,fadeOut) {
-    this.x = x;
-    this.y = y;
+    GameObject.call(this,x,y,null,1000,1000);
     this.maxLife = life;
     this.life = life;
     this.radius = radius;
@@ -33,7 +32,6 @@ Particle.prototype.update = function() {
     if (this.fadeOut) {
         this.opacity = (this.life / this.maxLife);
     }
-   // console.log("xChange: " + this.xChange + ", yChange: " + this.yChange);
 }
 
 /**

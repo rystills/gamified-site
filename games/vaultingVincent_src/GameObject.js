@@ -3,13 +3,17 @@
  * @param x: the starting center x coordinate
  * @param y: the starting center y coordinate
  * @param imgName: the name of our starting image (used for images dict lookup)
+ * @param updateOrder: how late this object should update
+ * @param renderObject: how late this object should render
  * @param rot: the starting rotation (in degrees)
  */
-function GameObject(x,y,imgName,rot=0) {
+function GameObject(x,y,imgName,updateOrder,RenderOrder,rot=0) {
     this.x = x;
     this.y = y;
     this.rot = rot;
     this.imgName = imgName;
+    this.updateOrder = updateOrder;
+    this.RenderOrder = RenderOrder;
 }
 
 /**

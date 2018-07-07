@@ -1,7 +1,7 @@
 tileTypes = new Enum("grassTop","grassLeft","grassRight","dirt","water","lava");
 tileStates = new Enum("solid","liquid","lava","intangible");
 tileProperties = {};
-tileProperties[tileTypes.grassTop] = {imgName:"ground",state:tileStates.solid};
+tileProperties[tileTypes.grassTop] = {imgName:"pipes",state:tileStates.solid};
 
 /**
  * Tile class: describes a single tile in the world
@@ -12,5 +12,5 @@ tileProperties[tileTypes.grassTop] = {imgName:"ground",state:tileStates.solid};
 makeChild("Tile","GameObject");
 function Tile(x,y,type) {
     this.type = type;
-    GameObject.call(this,x,y,tileProperties[this.type].imgName);
+    GameObject.call(this,x,y,tileProperties[this.type].imgName,-1000,-1000);
 }
