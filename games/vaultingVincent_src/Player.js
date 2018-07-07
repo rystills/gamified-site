@@ -32,12 +32,13 @@ function Player(x,y) {
     this.jumpBuffer = 0;
     this.jumpPressed = false;
 
-    this.dashing = false;
     this.canDash = true;
+    this.dashDir = "left";
     this.dashMaxBuffer = 12;
     this.dashBuffer = 0;
-    this.dashMaxTimer = 15;
+    this.dashMaxTimer = 10;
     this.dashTimer = 0;
+    this.dashVel = 12;
 }
 
 /**
@@ -73,13 +74,15 @@ Player.prototype.tickTimers = function() {
     this.jumpHoldTimer = keysDown["W"] ? clamp(this.jumpHoldTimer - 1, 0, this.jumpMaxHoldTimer) : 0;
     this.jumpBuffer = clamp(this.jumpBuffer-1, 0, this.jumpMaxBuffer);
     this.wallJumpVelocityTimer = clamp(this.wallJumpVelocityTimer - 1, 0, this.wallJumpMaxVelocityTimer);
+    this.dashTimer = clamp(this.dashTimer - 1, 0, this.dashMaxTimer);
+    this.dashBuffer = clamp(this.dashBuffer - 1, 0, this.dashMaxBuffer);
 }
 
 /**
  * apply acceleration and deceleration to horizontal movement, then update x position
  */
 Player.prototype.updateHorizontalMovement = function() {
-    if (this.wallJumpVelocityTimer == 0) {
+    if (this.wallJumpVelocityTimer == 0 && this.dashTimer == 0) {
         //horizontal movement (when not locked out by walljump timer)
         if (keysDown["A"] || keysDown["D"]) {
             this.xvel = clamp(this.xvel-(this.grounded ? this.xAccelGround : this.xAccelAir)*(keysDown["D"] ? -1 : 1), -this.xvelMax, this.xvelMax);
@@ -104,6 +107,7 @@ Player.prototype.evaluateHorizontalCollisions = function() {
         this.xvel = 0;
         this.wallJumpVelocityTimer = 0;
         this.wallSliding = true;
+        this.dashTimer = 0;
         this.yvel = clamp(this.yvel,-Number.MAX_VALUE,this.yVelSlide);
     }
 }
@@ -112,10 +116,12 @@ Player.prototype.evaluateHorizontalCollisions = function() {
  * apply gravity to vertical movement, then update y position
  */
 Player.prototype.updateVerticalMovement = function() {
-    //apply gravity (unbounded rising speed with 1/2 reduction on button hold buffer, bounded falling speed)
-    this.yvel = clamp(this.yvel + this.yAccel * (keysDown["W"] && this.jumpHoldTimer > 0 ? .2 : 1), -Number.MAX_VALUE, this.yVelMax);
-    //apply resulting y velocity to y coordinate
-    this.y += this.yvel;
+    if (this.dashTimer == 0) {
+        //apply gravity (unbounded rising speed with 1/2 reduction on button hold buffer, bounded falling speed)
+        this.yvel = clamp(this.yvel + this.yAccel * (keysDown["W"] && this.jumpHoldTimer > 0 ? .2 : 1), -Number.MAX_VALUE, this.yVelMax);
+        //apply resulting y velocity to y coordinate
+        this.y += this.yvel;
+    }
 }
 
 /**
@@ -137,6 +143,7 @@ Player.prototype.updateGrounded = function() {
     for (let i = 0; i < tiles.length; ++i) {
         if (tileProperties[tiles[i].type].state == tileStates.solid && this.collide(tiles[i])) {
             this.grounded = true;
+            this.canDash = true;
             this.yvel = 0;
             break;
         }
@@ -149,7 +156,7 @@ Player.prototype.updateGrounded = function() {
 /**
  * evaluate the player in the grounded or walljump state, processing potential jump commands
  */
-Player.prototype.evaluateGrounded = function() {
+Player.prototype.evaluateGroundedOptions = function() {
     if (this.grounded || this.wallSliding) {
         //reset walljump timer when grounded or wall sliding
         this.wallJumpVelocityTimer = 0;
@@ -174,18 +181,58 @@ Player.prototype.evaluateGrounded = function() {
 }
 
 /**
+ * evaluate the player's dash status
+ */
+Player.prototype.evaluateDash = function() {
+    if (this.canDash && this.dashTimer == 0 && (keysPressed["A"] || keysPressed["D"])) {
+        //first key press; reset press buffer and set dash direction
+        if (this.dashBuffer == 0) {
+            this.dashBuffer = this.dashMaxBuffer;
+            this.dashDir = keysPressed["A"] ? "left" : "right";
+        }
+        //second key press; trigger a dash if we pressed the same direction as last time
+        else {
+            //same direction; activate dash
+            if ((keysPressed["A"] && this.dashDir == "left") || (keysPressed["D"] && this.dashDir == "right")) {
+                this.dashBuffer = 0;
+                this.dashTimer = this.dashMaxTimer;
+                this.canDash = false;
+                this.wallJumpVelocityTimer = 0;
+            }
+            //different key press
+            else {
+                this.dashBuffer = this.dashMaxBuffer;
+                this.dashDir = keysPressed["A"] ? "left" : "right";
+            }
+        }
+    }
+}
+
+/**
+ * update the player's dash
+ */
+Player.prototype.updateDash = function() {
+    if (this.dashTimer > 0) {
+        this.xvel = (this.dashDir == "left" ? -1 : 1) * this.dashVel;
+        this.yvel = 0;
+    }
+}
+
+/**
  * update the player character
  */
 Player.prototype.update = function() {
     this.tickTimers();
     //reset jump buffer on jump key press
-    this.jumpBuffer = keysPressed["W"] ? this.jumpMaxBuffer : this.jumpBuffer;
+    if (keysPressed["W"]) this.jumpBuffer = this.jumpMaxBuffer;
     this.updateHorizontalMovement();
     this.evaluateHorizontalCollisions();
     this.updateVerticalMovement();
     this.evaluateVerticalCollisions();
     this.updateGrounded();
     //reset jump hold timer if we're no longer moving up
-    this.jumpHoldTimer = this.yvel >= 0 ? 0 : this.jumpHoldTimer;
-    this.evaluateGrounded();
+    if (this.yvel >= 0) this.jumpHoldTimer =  0;
+    this.evaluateDash();
+    this.updateDash();
+    this.evaluateGroundedOptions();
 }
