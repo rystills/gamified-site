@@ -92,6 +92,8 @@ Player.prototype.updateHorizontalMovement = function() {
             let xDecel = this.grounded ? this.xDecelGround : this.xDecelAir;
             this.xvel -= Math.abs(this.xvel) <= (xDecel) ? this.xvel : Math.sign(this.xvel) * (xDecel);
         }
+        //clamp xvel to max when not performing a dash or walljump
+        this.xvel = clamp(this.xvel,-this.xvelMax,this.xvelMax);
     }
     //apply resulting x velocity to x coordinate
     this.x += this.xvel;
