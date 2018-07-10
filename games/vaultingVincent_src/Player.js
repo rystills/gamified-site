@@ -34,7 +34,8 @@ Player.prototype.reset = function() {
     this.grounded = false;
     this.wallSliding = false;
     this.wallDir = "left";
-    this.yVelSlide = 1;
+    this.yVelSlide = 0;
+    this.wallClimbVel = 4;
     
     this.wallJumpMaxVelocityTimer = 10;
     this.wallJumpVelocityTimer = 0;
@@ -84,7 +85,7 @@ Player.prototype.moveOutsideCollisions = function(isXAxis, moveSign, collidingOb
  * tick all timers down by one frame
  */
 Player.prototype.tickTimers = function() {
-    this.jumpHoldTimer = keysDown["W"] ? clamp(this.jumpHoldTimer - 1, 0, this.jumpMaxHoldTimer) : 0;
+    this.jumpHoldTimer = keysDown["B"] ? clamp(this.jumpHoldTimer - 1, 0, this.jumpMaxHoldTimer) : 0;
     this.jumpBuffer = clamp(this.jumpBuffer-1, 0, this.jumpMaxBuffer);
     this.wallJumpVelocityTimer = clamp(this.wallJumpVelocityTimer - 1, 0, this.wallJumpMaxVelocityTimer);
     this.dashTimer = clamp(this.dashTimer - 1, 0, this.dashMaxTimer);
@@ -148,21 +149,17 @@ Player.prototype.evaluateHorizontalCollisions = function() {
         this.xvel = 0;
         this.dashTimer = 0;
     }
-    //stop wall sliding if we press down
-    if (keysDown["S"]) {
-        this.wallSliding = false;
-    }
-    else {
-        //wall slide if we move into a wall while holding the corresponding directional button, or if we're already sliding on a wall with 0 velocity
-        this.wallSliding = !this.grounded && ((colResolved && (this.wallDir == "right" && keysDown["D"] || this.wallDir == "left" && keysDown["A"])) || 
-        (this.wallSliding && (this.xvel == 0) && this.nextToWall(this.wallDir)));
-        if (this.wallSliding) {
-            this.xvel = 0;
-            this.yvel = clamp(this.yvel,-Number.MAX_VALUE,this.yVelSlide);
-            this.faceDir = (this.wallDir == "left" ? "right" : "left");
-            //spawn wall particles
+    
+    //wall slide if we move into a wall while holding the corresponding directional button, or if we're already sliding on a wall with 0 velocity
+    this.wallSliding = !this.grounded && ((colResolved && (this.wallDir == "right" && keysDown["D"] || this.wallDir == "left" && keysDown["A"])) || 
+    (this.wallSliding && (this.xvel == 0) && this.nextToWall(this.wallDir)));
+    if (this.wallSliding) {
+        this.xvel = 0;
+        this.faceDir = (this.wallDir == "left" ? "right" : "left");
+        //spawn wall particles
+        if (this.yvel != 0) {
             this.spawnParticles(10,this.cx() - images[this.imgName].width/2 * (this.wallDir == "left" ? 1 : -1),this.cx() - images[this.imgName].width/4 * (this.wallDir == "left" ? 1 : -1),
-            this.cy() -  images[this.imgName].height/2, this.cy() +  images[this.imgName].height/2, 15,"200,255,0",4,0,this.yvel/16);
+            this.cy() -  images[this.imgName].height/2, this.cy() +  images[this.imgName].height/2, 15,"255,255,255",4,0,this.yvel/16);
         }
     }
 }
@@ -173,9 +170,23 @@ Player.prototype.evaluateHorizontalCollisions = function() {
 Player.prototype.updateVerticalMovement = function() {
     if (this.dashTimer == 0) {
         //apply gravity (unbounded rising speed with 1/2 reduction on button hold buffer, bounded falling speed)
-        this.yvel = clamp(this.yvel + this.yAccel * (keysDown["W"] && this.jumpHoldTimer > 0 ? .2 : 1), -Number.MAX_VALUE, this.yVelMax);
-        //apply resulting y velocity to y coordinate
-        this.y += this.yvel;
+        this.yvel = clamp(this.yvel + this.yAccel * (keysDown["B"] && this.jumpHoldTimer > 0 ? .2 : 1), -Number.MAX_VALUE, (this.wallSliding ? this.yVelSlide: this.yVelMax));
+        if (this.wallSliding) {
+            if (keysDown["W"]) this.yvel = -this.wallClimbVel;
+            else if (keysDown["S"]) this.yvel = this.wallClimbVel;
+        }
+    }
+    //apply resulting y velocity to y coordinate
+    this.y += this.yvel;
+    //check if we just climbed up and over the wall
+    if (this.yvel < 0 && this.wallSliding && keysDown["W"] && !(this.nextToWall(this.wallDir))) {
+        this.wallSliding = false;
+        this.yvel = 0;
+        ++this.y;
+        while (!this.nextToWall(this.wallDir)) {
+            ++this.y;
+        }
+        --this.y;
     }
 }
 
@@ -224,7 +235,7 @@ Player.prototype.evaluateGroundedOptions = function() {
         }
         //reset walljump timer when grounded or wall sliding
         this.wallJumpVelocityTimer = 0;
-        if (keysDown["W"] && this.jumpBuffer > 0) {
+        if (keysDown["B"] && this.jumpBuffer > 0) {
             //reset jump buffer on successful jump
             this.jumpBuffer = 0;
             this.jumpHoldTimer = this.jumpMaxHoldTimer;
@@ -272,7 +283,7 @@ Player.prototype.die = function() {
  */
 Player.prototype.evaluateDash = function() {
     if (this.canDash && this.dashTimer == 0 && (keysPressed["M"])) {
-        if (this.wallSliding) {
+        if (this.wallSliding || (keysDown["A"] && keysDown["D"])) {
             this.dashDir = this.faceDir;
         }
         else {
@@ -322,7 +333,7 @@ Player.prototype.updateDash = function() {
 Player.prototype.update = function() {
     this.tickTimers();
     //reset jump buffer on jump key press
-    if (keysPressed["W"]) this.jumpBuffer = this.jumpMaxBuffer;
+    if (keysPressed["B"]) this.jumpBuffer = this.jumpMaxBuffer;
     this.updateHorizontalMovement();
     this.evaluateHorizontalCollisions();
     this.updateVerticalMovement();

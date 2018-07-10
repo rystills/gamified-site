@@ -23,9 +23,9 @@ include($_SERVER["DOCUMENT_ROOT"] . '/backend/session.php');
 		<font color="white"><h2 style="margin-left:-560px; line-height: 0px;padding-bottom: 4px;">Instructions:</h2>
 		<h4 style="margin-left:-550px;line-height: 20px;"> 
 		> A/D to move left/right respectively<br>
-		> Double tap A/D to dash left/right respectively<br>
-		> S to stop wall sliding<br>
-		> W to jump</h4></font>
+		> W/S to move up/down walls respectively<br>
+		> B to jump<br>
+		> M to dash</h4></font>
 	</div>
 	<script src="vaultingVincent_main.js"></script>
 </body>
