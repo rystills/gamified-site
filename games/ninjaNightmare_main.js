@@ -53,10 +53,10 @@ function loadAssets() {
 	requiredFiles = [
 		"src\\util.js","src\\setupKeyListeners.js", //util functions
 		"src\\classes\\Enum.js", "src\\classes\\Button.js", //util classes
-		"vaultingVincent_images\\pipes.png", "vaultingVincent_images\\player.png", //images
-		"vaultingVincent_src\\GameObject.js","vaultingVincent_src\\Enemy.js", //source files
-		"vaultingVincent_src\\Tile.js","vaultingVincent_src\\Particle.js","vaultingVincent_src\\Player.js", //source files
-		"vaultingVincent_src\\Room.js", //source files
+		"ninjaNightmare_images\\pipes.png", "ninjaNightmare_images\\player.png", //images
+		"ninjaNightmare_src\\GameObject.js","ninjaNightmare_src\\Enemy.js", //source files
+		"ninjaNightmare_src\\Tile.js","ninjaNightmare_src\\Particle.js","ninjaNightmare_src\\Player.js", //source files
+		"ninjaNightmare_src\\Room.js", //source files
 		];
 	
 	//manually load the asset loader

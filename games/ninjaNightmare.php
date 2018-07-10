@@ -12,7 +12,7 @@ include($_SERVER["DOCUMENT_ROOT"] . '/backend/session.php');
 	<!-- Custom styles for this template -->
 	<link href="../../instructions.css" rel="stylesheet">
 
-	<title>Vaulting Vincent</title>
+	<title>Ninja Nightmare</title>
 	</head>
 <body style="background-color:#9666c6">
 	<div id="canvasDiv" align="center">
@@ -27,6 +27,6 @@ include($_SERVER["DOCUMENT_ROOT"] . '/backend/session.php');
 		> B to jump<br>
 		> M to dash</h4></font>
 	</div>
-	<script src="vaultingVincent_main.js"></script>
+	<script src="ninjaNightmare_main.js"></script>
 </body>
 </html>
