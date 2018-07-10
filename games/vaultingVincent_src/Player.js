@@ -21,16 +21,16 @@ Player.prototype.reset = function() {
     this.y = this.startY;
     this.yvel = 0;
     this.xvel = 0;
-    this.xAccelGround = 1;
-    this.xAccelAir = .7;
+    this.xAccelGround = 10;
+    this.xAccelAir = 10;
     this.xvelMax = 6;
     this.yAccel = .85;
     this.yVelMax = 10;
     this.jumpVel = 11;
     this.wallJumpYVel = 9;
     this.walljumpXVel = 6;
-    this.xDecelGround = 1;
-    this.xDecelAir = 0;
+    this.xDecelGround = 10;
+    this.xDecelAir = 10;
     this.grounded = false;
     this.wallSliding = false;
     this.wallDir = "left";
@@ -46,11 +46,11 @@ Player.prototype.reset = function() {
 
     this.canDash = true;
     this.dashDir = "left";
-    this.dashMaxBuffer = 12;
-    this.dashBuffer = 0;
     this.dashMaxTimer = 10;
     this.dashTimer = 0;
-    this.dashVel = 12;
+    this.dashVel = 18;
+
+    this.faceDir = "right";
 }
 
 /**
@@ -88,7 +88,6 @@ Player.prototype.tickTimers = function() {
     this.jumpBuffer = clamp(this.jumpBuffer-1, 0, this.jumpMaxBuffer);
     this.wallJumpVelocityTimer = clamp(this.wallJumpVelocityTimer - 1, 0, this.wallJumpMaxVelocityTimer);
     this.dashTimer = clamp(this.dashTimer - 1, 0, this.dashMaxTimer);
-    this.dashBuffer = clamp(this.dashBuffer - 1, 0, this.dashMaxBuffer);
 }
 
 /**
@@ -97,7 +96,7 @@ Player.prototype.tickTimers = function() {
 Player.prototype.updateHorizontalMovement = function() {
     if (this.wallJumpVelocityTimer == 0 && this.dashTimer == 0) {
         //horizontal movement (when not locked out by walljump timer)
-        if ((keysDown["A"] || keysDown["D"]) && !(keysDown["A"] && keysDown["D"])) {
+        if (!this.wallSliding && ((keysDown["A"] || keysDown["D"]) && !(keysDown["A"] && keysDown["D"]))) {
             this.xvel = clamp(this.xvel-(this.grounded ? this.xAccelGround : this.xAccelAir)*(keysDown["D"] ? -1 : 1), -this.xvelMax, this.xvelMax);
         }
         //horizontal deceleration
@@ -114,6 +113,9 @@ Player.prototype.updateHorizontalMovement = function() {
         //spawn running particles
         this.spawnParticles(10,this.cx() - images[this.imgName].width/2,this.cx() + images[this.imgName].width/2,
         this.cy() +  images[this.imgName].height/4, this.cy() +  images[this.imgName].height/2, 10,"255,255,255",3,this.xvel/16,-.1);
+    }
+    if (this.xvel != 0) {
+        this.faceDir = this.xvel < 0 ? "left" : "right";
     }
 }
 
@@ -157,6 +159,7 @@ Player.prototype.evaluateHorizontalCollisions = function() {
         if (this.wallSliding) {
             this.xvel = 0;
             this.yvel = clamp(this.yvel,-Number.MAX_VALUE,this.yVelSlide);
+            this.faceDir = (this.wallDir == "left" ? "right" : "left");
             //spawn wall particles
             this.spawnParticles(10,this.cx() - images[this.imgName].width/2 * (this.wallDir == "left" ? 1 : -1),this.cx() - images[this.imgName].width/4 * (this.wallDir == "left" ? 1 : -1),
             this.cy() -  images[this.imgName].height/2, this.cy() +  images[this.imgName].height/2, 15,"200,255,0",4,0,this.yvel/16);
@@ -196,7 +199,6 @@ Player.prototype.updateGrounded = function() {
     for (let i = 0; i < activeRoom.tiles.length; ++i) {
         if (tileProperties[activeRoom.tiles[i].type].state == tileStates.solid && this.collide(activeRoom.tiles[i])) {
             this.grounded = true;
-            this.canDash = true;
             this.yvel = 0;
             break;
         }
@@ -217,6 +219,9 @@ Player.prototype.updateGrounded = function() {
  */
 Player.prototype.evaluateGroundedOptions = function() {
     if (this.grounded || this.wallSliding) {
+        if (this.dashTimer == 0) {
+            this.canDash = true;
+        }
         //reset walljump timer when grounded or wall sliding
         this.wallJumpVelocityTimer = 0;
         if (keysDown["W"] && this.jumpBuffer > 0) {
@@ -266,27 +271,16 @@ Player.prototype.die = function() {
  * evaluate the player's dash status
  */
 Player.prototype.evaluateDash = function() {
-    if (this.canDash && this.dashTimer == 0 && (keysPressed["A"] || keysPressed["D"])) {
-        //first key press; reset press buffer and set dash direction
-        if (this.dashBuffer == 0) {
-            this.dashBuffer = this.dashMaxBuffer;
-            this.dashDir = keysPressed["A"] ? "left" : "right";
+    if (this.canDash && this.dashTimer == 0 && (keysPressed["M"])) {
+        if (this.wallSliding) {
+            this.dashDir = this.faceDir;
         }
-        //second key press; trigger a dash if we pressed the same direction as last time
         else {
-            //same direction; activate dash
-            if ((keysPressed["A"] && this.dashDir == "left") || (keysPressed["D"] && this.dashDir == "right")) {
-                this.dashBuffer = 0;
-                this.dashTimer = this.dashMaxTimer;
-                this.canDash = false;
-                this.wallJumpVelocityTimer = 0;
-            }
-            //different key press
-            else {
-                this.dashBuffer = this.dashMaxBuffer;
-                this.dashDir = keysPressed["A"] ? "left" : "right";
-            }
+            this.dashDir = keysDown["A"] ? "left" : (keysDown["D"] ? "right" : this.faceDir);
         }
+        this.dashTimer = this.dashMaxTimer;
+        this.canDash = false;
+        this.wallJumpVelocityTimer = 0;        
     }
 }
 
@@ -340,4 +334,12 @@ Player.prototype.update = function() {
     this.updateDash();
     this.evaluateGroundedOptions();
     this.checkBelowMap();
+}
+
+/**
+ * render the player facing in the correct direction
+ * @param cnv: the canvas on which to render
+ */
+Player.prototype.render = function(ctx) {
+    drawCentered(this.imgName,ctx,this.cx(),this.cy(),this.rot,this.faceDir == "left");
 }

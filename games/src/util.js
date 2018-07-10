@@ -142,13 +142,16 @@ function getRandomInt(min, max) {
  * @param y: the center x coordinate at which to draw the image
  * @param rot: if specified, the amount in degrees by which to rotate the image
  */
-function drawCentered(imageName,ctx,x,y,rot) {
+function drawCentered(imageName,ctx,x,y,rot,flipHorizontal=false) {
 	let img = images[imageName];
 	ctx.save();
 	//perform the inverse of the object's translation to effectively bring it to the origin
 	ctx.translate(x,y);
 	if (rot != 0) {
 		ctx.rotate(rot*Math.PI/180);
+	}
+	if (flipHorizontal) {
+		ctx.scale(-1, 1);
 	}
 	ctx.drawImage(img, -(img.width/2), -(img.height/2));
 	//restore the canvas now that we're done modifying it
