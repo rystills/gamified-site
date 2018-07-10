@@ -6,7 +6,19 @@
 makeChild("Player","GameObject");
 function Player(x,y) {
     GameObject.call(this,x,y,"player",100,100);
-    //movement properties
+    this.startX = x;
+    this.startY = y;
+    this.reset();
+}
+
+/**
+ * reset all of the player properties to their default value
+ */
+Player.prototype.reset = function() {
+    this.dead = false;
+
+    this.x = this.startX;
+    this.y = this.startY;
     this.yvel = 0;
     this.xvel = 0;
     this.xAccelGround = 1;
@@ -231,6 +243,26 @@ Player.prototype.evaluateGroundedOptions = function() {
 }
 
 /**
+ * check if the player has fallen below the map; if so, kill the player
+ */
+Player.prototype.checkBelowMap = function() {
+    for (let i = 0; i < activeRoom.tiles.length; ++i) {
+        if (activeRoom.tiles[i].y > (this.y-100)) {
+            return;
+        }
+    }
+    this.die();
+}
+
+/**
+ * kill the player
+ */
+Player.prototype.die = function() {
+    this.x = this.startX;
+    this.y = this.startY;
+}
+
+/**
  * evaluate the player's dash status
  */
 Player.prototype.evaluateDash = function() {
@@ -307,4 +339,5 @@ Player.prototype.update = function() {
     this.evaluateDash();
     this.updateDash();
     this.evaluateGroundedOptions();
+    this.checkBelowMap();
 }
