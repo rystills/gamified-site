@@ -37,7 +37,7 @@ Player.prototype.reset = function() {
     this.yVelSlide = 0;
     this.wallClimbVel = 4;
     
-    this.wallJumpMaxVelocityTimer = 10;
+    this.wallJumpMaxVelocityTimer = 13;
     this.wallJumpVelocityTimer = 0;
     this.jumpMaxHoldTimer = 10;
     this.jumpHoldTimer = 0;
@@ -245,15 +245,20 @@ Player.prototype.evaluateGroundedOptions = function() {
             }
             //walljump
             else {
-                this.yvel = -this.wallJumpYVel;
-                this.xvel = (this.wallDir == "left" ? 1 : -1) * this.walljumpXVel;
-                this.wallJumpVelocityTimer = this.wallJumpMaxVelocityTimer;
+                //drop if holding down
+                if (!keysDown["S"]) {
+                    this.yvel = -this.wallJumpYVel;
+                    this.xvel = (this.wallDir == "left" ? 1 : -1) * this.walljumpXVel;
+                    this.wallJumpVelocityTimer = this.wallJumpMaxVelocityTimer;
+                }
+            }
+            //spawn jump particles
+            if (!(this.wallSliding && keysDown["S"])) {
+                this.spawnParticles(10,this.cx() - images[this.imgName].width/2,this.cx() + images[this.imgName].width/2,
+                this.cy() - (this.wallJumpVelocityTimer==0 ? 0 : images[this.imgName].height/2), this.cy() +  images[this.imgName].height/2, 30,"255,255,255",8,this.xvel/16,-.2);
             }
             this.grounded = false;
             this.wallSliding = false;
-            //spawn jump particles
-            this.spawnParticles(10,this.cx() - images[this.imgName].width/2,this.cx() + images[this.imgName].width/2,
-            this.cy() - (this.wallJumpVelocityTimer==0 ? 0 : images[this.imgName].height/2), this.cy() +  images[this.imgName].height/2, 30,"255,255,255",8,this.xvel/16,-.2);
         }
     }
 }

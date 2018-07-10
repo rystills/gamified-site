@@ -25,6 +25,7 @@ include($_SERVER["DOCUMENT_ROOT"] . '/backend/session.php');
 		> A/D to move left/right respectively<br>
 		> W/S to move up/down walls respectively<br>
 		> B to jump<br>
+		> N to slash<br>
 		> M to dash</h4></font>
 	</div>
 	<script src="ninjaNightmare_main.js"></script>
