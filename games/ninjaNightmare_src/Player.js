@@ -156,8 +156,13 @@ Player.prototype.evaluateHorizontalCollisions = function() {
     if (this.wallSliding) {
         this.xvel = 0;
         this.faceDir = (this.wallDir == "left" ? "right" : "left");
-        //spawn wall particles
-        if (this.yvel != 0) {
+        if (colResolved) {
+            //spawn wall hit particles
+            this.spawnParticles(10,this.cx() - images[this.imgName].width/2,this.cx() + images[this.imgName].width/2,
+            this.cy() - (this.wallJumpVelocityTimer==0 ? 0 : images[this.imgName].height/2), this.cy() +  images[this.imgName].height/2, 30,"255,255,255",8,0,this.yvel/16);
+        }
+        else if (this.yvel != 0) {
+            //spawn wall slide particles
             this.spawnParticles(10,this.cx() - images[this.imgName].width/2 * (this.wallDir == "left" ? 1 : -1),this.cx() - images[this.imgName].width/4 * (this.wallDir == "left" ? 1 : -1),
             this.cy() -  images[this.imgName].height/2, this.cy() +  images[this.imgName].height/2, 15,"255,255,255",4,0,this.yvel/16);
         }
