@@ -24,7 +24,8 @@ include($_SERVER["DOCUMENT_ROOT"] . '/backend/session.php');
 		<h4 style="margin-left:-550px;line-height: 20px;"> 
 		> A/D to move left/right respectively<br>
 		> W/S to move up/down walls respectively<br>
-		> B to jump<br>
+		> B to jump/walljump<br>
+		> B + S to drop from a wall<br>
 		> N to slash<br>
 		> M to dash</h4></font>
 	</div>
