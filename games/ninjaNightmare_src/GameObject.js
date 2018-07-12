@@ -71,7 +71,7 @@ GameObject.prototype.cy = function() {
 /**
  * render this gameObject to the provided canvas
  */
-GameObject.prototype.render = function(ctx) {
+GameObject.prototype.render = function() {
     drawCentered(this.imgName,this.ctx,this.cx(),this.cy(),this.rot);
 }
 

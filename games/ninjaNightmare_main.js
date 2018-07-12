@@ -39,6 +39,7 @@ function loadAssets() {
 		"src\\util.js","src\\setupKeyListeners.js", //util functions
 		"src\\classes\\Enum.js", "src\\classes\\Button.js", //util classes
 		"ninjaNightmare_images\\pipes.png", "ninjaNightmare_images\\player.png", //images
+		"targetTest_sounds\\confirm.ogg","targetTest_sounds\\select.ogg", //sounds
 		"ninjaNightmare_src\\GameObject.js","ninjaNightmare_src\\Enemy.js", //source files
 		"ninjaNightmare_src\\Tile.js","ninjaNightmare_src\\Particle.js","ninjaNightmare_src\\Player.js", //source files
 		"ninjaNightmare_src\\Room.js","ninjaNightmare_src\\TextBox.js" //source files
@@ -68,18 +69,18 @@ function initGlobals() {
 
 	//demo data
 	rmPlay = new Room("turquoise");
-	rmPlay.addObject(new Player(300,300));
-	rmPlay.addTile(new Tile(300,400,tileTypes.grassTop));
-	rmPlay.addTile(new Tile(300,200,tileTypes.grassTop));
-	rmPlay.addTile(new Tile(300,464,tileTypes.grassTop));
-	rmPlay.addTile(new Tile(300,528,tileTypes.grassTop));
-	rmPlay.addTile(new Tile(236,528,tileTypes.grassTop));
-	rmPlay.addTile(new Tile(172,528,tileTypes.grassTop));
-	rmPlay.addTile(new Tile(364,528,tileTypes.grassTop));
-	rmPlay.addTile(new Tile(428,528,tileTypes.grassTop));
+	rmPlay.addObject(new Player(300,300,ctx));
+	rmPlay.addTile(new Tile(300,400,tileTypes.grassTop,ctx));
+	rmPlay.addTile(new Tile(300,200,tileTypes.grassTop,ctx));
+	rmPlay.addTile(new Tile(300,464,tileTypes.grassTop,ctx));
+	rmPlay.addTile(new Tile(300,528,tileTypes.grassTop,ctx));
+	rmPlay.addTile(new Tile(236,528,tileTypes.grassTop,ctx));
+	rmPlay.addTile(new Tile(172,528,tileTypes.grassTop,ctx));
+	rmPlay.addTile(new Tile(364,528,tileTypes.grassTop,ctx));
+	rmPlay.addTile(new Tile(428,528,tileTypes.grassTop,ctx));
 	for (let i = 0; i < 5; ++i) {
-		rmPlay.addTile(new Tile(172,528 - 64*i,tileTypes.grassTop));
-		rmPlay.addTile(new Tile(428,528 - 64*i,tileTypes.grassTop));
+		rmPlay.addTile(new Tile(172,528 - 64*i,tileTypes.grassTop,ctx));
+		rmPlay.addTile(new Tile(428,528 - 64*i,tileTypes.grassTop,ctx));
 	}
 
 	rmMain = new Room("rgba(0,0,60)");

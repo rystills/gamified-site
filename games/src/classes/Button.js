@@ -97,3 +97,32 @@ function Button(x,y,cnv, text, fontSize, clickFunc,clickArg) {
 	this.height = this.fontSize + 4;
 	this.active = true;
 }
+
+/**
+ * render this button to its specified context (note that Target Test still handles button rendering manually)
+ */
+Button.prototype.render = function() {
+	let btnctx = this.canvas.getContext("2d");
+	//fill light blue border color
+	btnctx.fillStyle = "rgb(" +  
+	Math.round(.15 * this.blendWhiteness) + ", " + 
+	Math.round(this.blendWhiteness *.75) + ", " + 
+	Math.round(.1 * this.blendWhiteness) + ")";
+	btnctx.fillRect(this.x, this.y, this.width,this.height);
+	
+	//fill blue inner color
+	btnctx.fillStyle = "rgb(" + 
+	Math.round(this.blendWhiteness *.1) + ", " + 
+	Math.round(.15 * this.blendWhiteness) + ", " + 
+	Math.round(.75 * this.blendWhiteness) + ")";
+	btnctx.fillRect(this.x + 2, this.y + 2, this.width - 4,this.height - 4);
+	
+	//set the font size and color depending on the button's attributes and state
+	btnctx.font = this.fontSize + "px Arial";
+	btnctx.fillStyle = "rgb(" + this.blendWhiteness + ", " + this.blendWhiteness + ", " + this.blendWhiteness + ")";
+	
+	//draw the button label (add slight position offset to account for line spacing)
+	btnctx.fillText(this.text,this.x + 4, this.y + this.height/2 + 8);
+	uictx.font = "24px Arial";
+	uictx.fillStyle = "#FFFFFF";
+}

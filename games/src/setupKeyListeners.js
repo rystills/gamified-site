@@ -20,7 +20,7 @@ function setupKeyListeners() {
 	mousePressedLeft = false;
 	mouseDownRight = false;
 	mousePressedRight = false;
-	cnv.mousePos = {x:cnv.width/2,y:cnv.height/2};
+	cnv.mousePos = {x:-1,y:-1};
 	uicnv.mousePos = {x:-1,y:-1};
 	
 	document.body.addEventListener("mousemove", function (e) {
