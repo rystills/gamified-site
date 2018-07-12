@@ -1,22 +1,7 @@
 /**
- * clear each canvas to a predetermined fillcolor, preparing it for a fresh render
- */
-function clearScreen() {
-	//main canvas
-	ctx.fillStyle="turquoise";
-	ctx.fillRect(0,0,cnv.width,cnv.height);
-	
-	//HUD canvas
-	uictx.fillStyle="rgb(0,0,0)";
-	uictx.fillRect(0,0,uicnv.width,uicnv.height);
-}
-
-/**
  * render all objects and HUD elements
  */
 function render() {
-	//clear all canvases for a fresh render
-	clearScreen();
 	activeRoom.render();
 	//toggle off any one-frame event indicators at the end of the update tick
 	resetPressedKeys();
@@ -56,7 +41,7 @@ function loadAssets() {
 		"ninjaNightmare_images\\pipes.png", "ninjaNightmare_images\\player.png", //images
 		"ninjaNightmare_src\\GameObject.js","ninjaNightmare_src\\Enemy.js", //source files
 		"ninjaNightmare_src\\Tile.js","ninjaNightmare_src\\Particle.js","ninjaNightmare_src\\Player.js", //source files
-		"ninjaNightmare_src\\Room.js", //source files
+		"ninjaNightmare_src\\Room.js","ninjaNightmare_src\\TextBox.js" //source files
 		];
 	
 	//manually load the asset loader
@@ -82,7 +67,7 @@ function initGlobals() {
 	particles = [];
 
 	//demo data
-	rmPlay = new Room();
+	rmPlay = new Room("turquoise");
 	rmPlay.addObject(new Player(300,300));
 	rmPlay.addTile(new Tile(300,400,tileTypes.grassTop));
 	rmPlay.addTile(new Tile(300,200,tileTypes.grassTop));
@@ -96,7 +81,18 @@ function initGlobals() {
 		rmPlay.addTile(new Tile(172,528 - 64*i,tileTypes.grassTop));
 		rmPlay.addTile(new Tile(428,528 - 64*i,tileTypes.grassTop));
 	}
+
+	rmMain = new Room("rgba(0,0,60)");
+	rmMain.addUI(new TextBox(cnv.width/2,cnv.height/3,true,"Welcome to Ninja Nightmare!","rgb(255,255,255)",54,ctx));
+	rmMain.addUI(new Button(cnv.width/2,cnv.height/2,cnv,"Create a Level",24,openLevelCreator));
 	
+	activeRoom = rmMain;
+}
+
+/**
+ * switch to the level creator room
+ */
+function openLevelCreator() {
 	activeRoom = rmPlay;
 }
 

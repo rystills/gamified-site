@@ -2,13 +2,15 @@
  * Player class: describes the playable charaacter
  * @param x: the starting center x coordinate
  * @param y: the starting center y coordinate
+ * @param ctx: the context to which the Player belongs
  */
 makeChild("Player","GameObject");
-function Player(x,y) {
+function Player(x,y,ctx) {
     GameObject.call(this,x,y,"player",100,100);
     this.startX = x;
     this.startY = y;
     this.reset();
+    this.ctx = ctx;
 }
 
 /**
@@ -359,8 +361,7 @@ Player.prototype.update = function() {
 
 /**
  * render the player facing in the correct direction
- * @param cnv: the canvas on which to render
  */
-Player.prototype.render = function(ctx) {
-    drawCentered(this.imgName,ctx,this.cx(),this.cy(),this.rot,this.faceDir == "left");
+Player.prototype.render = function() {
+    drawCentered(this.imgName,this.ctx,this.cx(),this.cy(),this.rot,this.faceDir == "left");
 }

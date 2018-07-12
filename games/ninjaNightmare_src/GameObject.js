@@ -5,15 +5,17 @@
  * @param imgName: the name of our starting image (used for images dict lookup)
  * @param updateOrder: how late this object should update
  * @param renderObject: how late this object should render
+ * @param ctx: the context to which this GameObject belongs
  * @param rot: the starting rotation (in degrees)
  */
-function GameObject(x,y,imgName,updateOrder,RenderOrder,rot=0) {
+function GameObject(x,y,imgName,updateOrder,RenderOrder,ctx,rot=0) {
     this.x = x;
     this.y = y;
     this.rot = rot;
     this.imgName = imgName;
     this.updateOrder = updateOrder;
     this.RenderOrder = RenderOrder;
+    this.ctx = ctx;
 }
 
 /**
@@ -68,10 +70,9 @@ GameObject.prototype.cy = function() {
 
 /**
  * render this gameObject to the provided canvas
- * @param cnv: the canvas on which to render
  */
 GameObject.prototype.render = function(ctx) {
-    drawCentered(this.imgName,ctx,this.cx(),this.cy(),this.rot);
+    drawCentered(this.imgName,this.ctx,this.cx(),this.cy(),this.rot);
 }
 
 /**
