@@ -43,7 +43,7 @@ function loadAssets() {
 		"ninjaNightmare_src\\GameObject.js","ninjaNightmare_src\\Enemy.js", //source files
 		"ninjaNightmare_src\\Tile.js","ninjaNightmare_src\\Particle.js","ninjaNightmare_src\\Player.js", //source files
 		"ninjaNightmare_src\\Room.js","ninjaNightmare_src\\TextBox.js", "ninjaNightmare_src\\Grid.js", //source files
-		"ninjaNightmare_src\\Placer.js" //source files
+		"ninjaNightmare_src\\ScrollIndicator.js","ninjaNightmare_src\\Placer.js" //source files
 		];
 	
 	//manually load the asset loader
@@ -74,8 +74,9 @@ function initGlobals() {
 	//level creator room
 	rmCreate = new Room("turquoise");
 	rmCreate.addObject(new Player(gridSize*4 + 16,gridSize*4 + 8,ctx));
-	rmCreate.addUI(new Button(5,5,uicnv,"Playtest",24,togglePlaytest));
-	rmCreate.addUI(new Button(5,45,uicnv,"Place Ground Tile",24,activatePlacer,"tile"));
+	rmCreate.addUI(new ScrollIndicator(5,25,uictx));
+	rmCreate.addUI(new Button(5,45,uicnv,"Playtest",24,togglePlaytest));
+	rmCreate.addUI(new Button(5,85,uicnv,"Place Ground Tile",24,activatePlacer,"tile"));
 	placer = rmCreate.addUI(new Placer(ctx));
 	rmCreate.addUI(new Grid(cnv));
 

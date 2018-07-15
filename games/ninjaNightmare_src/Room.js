@@ -10,6 +10,8 @@ function Room(clearColor) {
     this.ui = [];
     this.clearColor = clearColor;
     this.running = false;
+    this.scrollX = 0;
+    this.scrollY = 0;
 }
 
 /**
@@ -154,6 +156,10 @@ Room.prototype.render = function() {
 	//HUD canvas
 	uictx.fillStyle="rgb(0,0,0)";
     uictx.fillRect(0,0,uicnv.width,uicnv.height);
+
+    //offset by scroll value
+    ctx.save();
+    ctx.translate(-this.scrollX,-this.scrollY);
     
     //render tiles
     for (let i = 0; i < this.tiles.length; ++i) {
@@ -167,8 +173,12 @@ Room.prototype.render = function() {
     for (let i = 0; i < this.particles.length; ++i) {
         this.particles[i].render();
     }
+
     //render UI
     for (let i = 0; i < this.ui.length; ++i) {
         this.ui[i].render();
     }
+
+    //reset offset
+    ctx.restore();
 }
