@@ -6,7 +6,7 @@
  */
 makeChild("Player","GameObject");
 function Player(x,y,ctx) {
-    GameObject.call(this,x,y,"player",100,100);
+    GameObject.call(this,x,y,"player",100,-100);
     this.startX = x;
     this.startY = y;
     this.reset();
