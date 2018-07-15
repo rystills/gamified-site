@@ -23,6 +23,14 @@ Room.prototype.setRunning = function(running) {
     else {
         this.running = !this.running;
     }
+    //reset everything
+    for (let i = 0; i < this.updateObjects.length; ++i) {
+        this.updateObjects[i].reset();
+    }
+    for (let i = 0; i < this.tiles.length; ++i) {
+        this.tiles[i].reset();
+    }
+    this.particles.length = 0;
 }
 
 /**

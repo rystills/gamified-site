@@ -322,7 +322,7 @@ Player.prototype.evaluateDash = function() {
  */
 Player.prototype.spawnParticles = function(numParts,minX,maxX,minY,maxY,life,color,radius,xChange,yChange) {
         for (let i = 0; i < numParts; ++i) {
-            rmPlay.addParticle(new Particle(getRandomInt(minX,maxX),getRandomInt(minY,maxY),life,color,radius,xChange,yChange,true));
+            activeRoom.addParticle(new Particle(getRandomInt(minX,maxX),getRandomInt(minY,maxY),life,color,radius,xChange,yChange,true));
         }
 }
 

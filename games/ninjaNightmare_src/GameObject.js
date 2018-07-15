@@ -19,6 +19,11 @@ function GameObject(x,y,imgName,updateOrder,RenderOrder,ctx,rot=0) {
 }
 
 /**
+ * reset the GameObject back to its initial state
+ */
+GameObject.prototype.reset = function() { }
+
+/**
  * check if this GameObject is colliding with another GameObject via AABB
  * @param o: the other object we wish to check for collision with
  * @returns whethr or not we are colliding with GameObject o
