@@ -42,7 +42,7 @@ function loadAssets() {
 		"targetTest_sounds\\confirm.ogg","targetTest_sounds\\select.ogg", //sounds
 		"ninjaNightmare_src\\GameObject.js","ninjaNightmare_src\\Enemy.js", //source files
 		"ninjaNightmare_src\\Tile.js","ninjaNightmare_src\\Particle.js","ninjaNightmare_src\\Player.js", //source files
-		"ninjaNightmare_src\\Room.js","ninjaNightmare_src\\TextBox.js" //source files
+		"ninjaNightmare_src\\Room.js","ninjaNightmare_src\\TextBox.js", "ninjaNightmare_src\\Placer.js" //source files
 		];
 	
 	//manually load the asset loader
@@ -65,24 +65,19 @@ function initGlobals() {
 	prevTime = Date.now();
 	deltaTime = 0;
 	totalTime = 0;
+
+	//game vars
 	particles = [];
+	gridSuze = 64;
 
-	//demo data
-	rmPlay = new Room("turquoise");
-	rmPlay.addObject(new Player(300,300,ctx));
-	rmPlay.addTile(new Tile(300,400,tileTypes.grassTop,ctx));
-	rmPlay.addTile(new Tile(300,200,tileTypes.grassTop,ctx));
-	rmPlay.addTile(new Tile(300,464,tileTypes.grassTop,ctx));
-	rmPlay.addTile(new Tile(300,528,tileTypes.grassTop,ctx));
-	rmPlay.addTile(new Tile(236,528,tileTypes.grassTop,ctx));
-	rmPlay.addTile(new Tile(172,528,tileTypes.grassTop,ctx));
-	rmPlay.addTile(new Tile(364,528,tileTypes.grassTop,ctx));
-	rmPlay.addTile(new Tile(428,528,tileTypes.grassTop,ctx));
-	for (let i = 0; i < 5; ++i) {
-		rmPlay.addTile(new Tile(172,528 - 64*i,tileTypes.grassTop,ctx));
-		rmPlay.addTile(new Tile(428,528 - 64*i,tileTypes.grassTop,ctx));
-	}
+	//level creator room
+	rmCreate = new Room("turquoise");
+	rmCreate.addObject(new Player(300,300,ctx));
+	rmCreate.addUI(new Button(5,5,uicnv,"Playtest",24,togglePlaytest));
+	rmCreate.addUI(new Button(5,45,uicnv,"Place Ground Tile",24,activatePlacer,"tile"));
+	placer = rmCreate.addUI(new Placer(ctx));
 
+	//main menu room
 	rmMain = new Room("rgba(0,0,60)");
 	rmMain.addUI(new TextBox(cnv.width/2,cnv.height/3,true,"Welcome to Ninja Nightmare!","rgb(255,255,255)",54,ctx));
 	rmMain.addUI(new Button(cnv.width/2,cnv.height/2,cnv,"Create a Level",24,openLevelCreator));
@@ -91,10 +86,29 @@ function initGlobals() {
 }
 
 /**
- * switch to the level creator room
+ * toggle between playtest mode and create mode
+ * @param btn: the button which triggered this function
  */
-function openLevelCreator() {
-	activeRoom = rmPlay;
+function togglePlaytest(btn) {
+	rmCreate.setRunning();
+	btn.updateText(rmCreate.running ? "Stop Playtesting" : "Playtest");
+}
+
+/**
+ * activate the level creator placer with the specified object/tile type
+ * @param btn: the button which triggered this function
+ * @param placeType: the type to set the placer to
+ */
+function activatePlacer(btn, placeType) {
+	placer.activate(placeType);
+}
+
+/**
+ * switch to the level creator room
+ * @param btn: the button which triggered this function
+ */
+function openLevelCreator(btn) {
+	activeRoom = rmCreate;
 }
 
 //disallow right-click context menu as right click functionality is often necessary for gameplay

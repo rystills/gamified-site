@@ -90,12 +90,28 @@ function Button(x,y,cnv, text, fontSize, clickFunc,clickArg) {
 	this.arg = clickArg;
 	
 	//init dimensions using canvas and fontSize
-	let context = this.canvas.getContext("2d");
-	context.font = this.fontSize + "px Arial";
+	this.canvas.getContext("2d").font = this.fontSize + "px Arial";
 	//add a 4 pixel border to the text dimensions to make room for button outline + fill
-    this.width = context.measureText(this.text).width + 8;
+	this.measureWidth();
 	this.height = this.fontSize + 4;
 	this.active = true;
+}
+
+/**
+ * recalculate this button's width based on the length of its text
+ */
+Button.prototype.measureWidth = function() {
+	this.width = this.canvas.getContext("2d").measureText(this.text).width + 8;
+}
+
+/**
+ * update this button's text content, optionally updating the button width to match the new text width
+ * @param text: the new desired button text
+ * @param updateWidth: whether or not to update the width of the button
+ */
+Button.prototype.updateText = function(text,updateWidth = true) {
+	this.text = text;
+	this.measureWidth();
 }
 
 /**
