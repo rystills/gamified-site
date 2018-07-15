@@ -2,6 +2,11 @@ tileTypes = new Enum("grassTop","grassLeft","grassRight","dirt","water","lava");
 tileStates = new Enum("solid","liquid","lava","intangible");
 tileProperties = {};
 tileProperties[tileTypes.grassTop] = {imgName:"pipes",state:tileStates.solid};
+tileProperties[tileTypes.grassLeft] = {imgName:"pipes",state:tileStates.solid};
+tileProperties[tileTypes.grassRight] = {imgName:"pipes",state:tileStates.solid};
+tileProperties[tileTypes.dirt] = {imgName:"pipes",state:tileStates.solid};
+tileProperties[tileTypes.water] = {imgName:"pipes",state:tileStates.solid};
+tileProperties[tileTypes.lava] = {imgName:"pipes",state:tileStates.solid};
 
 /**
  * Tile class: describes a single tile in the world

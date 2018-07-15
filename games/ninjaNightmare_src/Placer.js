@@ -1,13 +1,16 @@
+placeTypes = new Enum();
+placeProperties = {};
+for (let i = 0; i < tileTypes.all.length; ++i) {
+    placeTypes.add(tileTypes.all[i]);
+    placeProperties[i] = {imgName: tileProperties[i].imgName};
+}
 /**
  * the Placer allows the user to add or remove elements in the level creator
  * @param ctx: the context to which the placer belongs
  */
-function Placer(ctx) {
-    this.ctx = ctx;
-    placeTypes = new Enum();
-    for (let i = 0; i < tileTypes.all.length; ++i) {
-        placeTypes.add(tileTypes.all[i]);
-    }
+function Placer(cnv) {
+    this.cnv = cnv;
+    this.ctx = this.cnv.getContext("2d");
     this.active = false;
     this.type = null;
 }
@@ -34,5 +37,9 @@ Placer.prototype.update = function() {
  * render the placer
  */
 Placer.prototype.render = function() {
-    return;
+    if (!this.active) {
+        return;
+    }
+    this.ctx.drawImage(images[placeProperties[this.type].imgName], Math.floor((activeRoom.scrollX + cnv.mousePos.x)/gridSize)*gridSize,
+    Math.floor((activeRoom.scrollY + cnv.mousePos.y)/gridSize)*gridSize);
 }

@@ -76,8 +76,8 @@ function initGlobals() {
 	rmCreate.addObject(new Player(gridSize*4 + 16,gridSize*4 + 8,ctx));
 	rmCreate.addUI(new ScrollIndicator(5,25,uictx));
 	rmCreate.addUI(new Button(5,45,uicnv,"Playtest",24,togglePlaytest));
-	rmCreate.addUI(new Button(5,85,uicnv,"Place Ground Tile",24,activatePlacer,"tile"));
-	placer = rmCreate.addUI(new Placer(ctx));
+	rmCreate.addUI(new Button(5,85,uicnv,"Place Ground Tile",24,activatePlacer,placeTypes.dirt));
+	placer = rmCreate.addUI(new Placer(cnv));
 	rmCreate.addUI(new Grid(cnv));
 
 	//main menu room
@@ -99,10 +99,10 @@ function togglePlaytest(btn) {
 
 /**
  * activate the level creator placer with the specified object/tile type
- * @param btn: the button which triggered this function
  * @param placeType: the type to set the placer to
+ * @param btn: the button which triggered this function
  */
-function activatePlacer(btn, placeType) {
+function activatePlacer(placeType, btn) {
 	placer.activate(placeType);
 }
 
