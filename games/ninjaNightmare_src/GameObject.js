@@ -8,13 +8,13 @@
  * @param ctx: the context to which this GameObject belongs
  * @param rot: the starting rotation (in degrees)
  */
-function GameObject(x,y,imgName,updateOrder,RenderOrder,ctx,rot=0) {
+function GameObject(x,y,imgName,updateOrder,renderOrder,ctx,rot=0) {
     this.x = x;
     this.y = y;
     this.rot = rot;
     this.imgName = imgName;
     this.updateOrder = updateOrder;
-    this.RenderOrder = RenderOrder;
+    this.renderOrder = renderOrder;
     this.ctx = ctx;
 }
 

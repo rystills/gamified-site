@@ -1,5 +1,5 @@
 /**
- * Grid class: renders a grid to the screen while in playtest mode
+ * Grid class: renders a grid to the screen and controls scrolling in playtest mode
  * @param cnv: the canvas on which to render
  */
 makeChild("Grid","GameObject");
@@ -12,8 +12,6 @@ function Grid(cnv) {
  * render the grid onto its canvas
  */
 Grid.prototype.render = function() {
-    activeRoom.scrollX += 1;
-    activeRoom.scrollY += 2;
     //only draw the grid in create mode
     if (activeRoom.running) {
         return;
