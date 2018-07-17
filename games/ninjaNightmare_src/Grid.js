@@ -6,6 +6,27 @@ makeChild("Grid","GameObject");
 function Grid(cnv) { 
     this.cnv = cnv;
     this.ctx = this.cnv.getContext("2d");
+    this.scrollBuffer = 100;
+    this.scrollMaxSpeed = 12;
+}
+
+/**
+ * scroll the screen when the mouse is near the window edge
+ */
+Grid.prototype.update = function() {
+    //check screen scroll
+    if (cnv.mousePos.x > cnv.width - this.scrollBuffer) {
+        activeRoom.scrollX += Math.round((this.scrollBuffer - (cnv.width - cnv.mousePos.x))/this.scrollBuffer * this.scrollMaxSpeed);
+    }
+    else if (cnv.mousePos.x < this.scrollBuffer) {
+        activeRoom.scrollX -= Math.round((this.scrollBuffer - (cnv.mousePos.x))/this.scrollBuffer * this.scrollMaxSpeed);
+    }
+    if (cnv.mousePos.y > cnv.height - this.scrollBuffer) {
+        activeRoom.scrollY += Math.round((this.scrollBuffer - (cnv.height - cnv.mousePos.y))/this.scrollBuffer * this.scrollMaxSpeed);
+    }
+    else if (cnv.mousePos.y < this.scrollBuffer) {
+        activeRoom.scrollY -= Math.round((this.scrollBuffer - (cnv.mousePos.y))/this.scrollBuffer * this.scrollMaxSpeed);
+    }
 }
 
 /**
