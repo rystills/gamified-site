@@ -73,7 +73,7 @@ function initGlobals() {
 
 	//level creator room
 	rmCreate = new Room("turquoise");
-	rmCreate.addObject(new Player(gridSize*4 + 16,gridSize*4 + 8,ctx));
+	player = rmCreate.addObject(new Player(gridSize*4 + 16,gridSize*4 + 8,ctx));
 	rmCreate.addUI(new ScrollIndicator(5,25,uictx));
 	rmCreate.addUI(new Button(5,45,uicnv,"Playtest",24,togglePlaytest));
 	rmCreate.addUI(new Button(5,85,uicnv,"Place Ground Tile",24,activatePlacer,placeTypes.dirt));

@@ -8,6 +8,7 @@ function Grid(cnv) {
     this.ctx = this.cnv.getContext("2d");
     this.scrollBuffer = 100;
     this.scrollMaxSpeed = 12;
+    this.mousePrev = this.cnv.mousePos;
 }
 
 /**
@@ -15,18 +16,25 @@ function Grid(cnv) {
  */
 Grid.prototype.update = function() {
     //check screen scroll
-    if (cnv.mousePos.x > cnv.width - this.scrollBuffer) {
-        activeRoom.scrollX += Math.round((this.scrollBuffer - (cnv.width - cnv.mousePos.x))/this.scrollBuffer * this.scrollMaxSpeed);
+    this.checkScroll();
+}
+
+/**
+ * check update the grid scroll
+ */
+Grid.prototype.checkScroll = function() {
+    if (activeRoom.running) {
+        //keep player in center of camera
+        activeRoom.scrollX = Math.round(player.cx() - this.cnv.width/2);
+        activeRoom.scrollY = Math.round(player.cy() - this.cnv.height/2);
     }
-    else if (cnv.mousePos.x < this.scrollBuffer) {
-        activeRoom.scrollX -= Math.round((this.scrollBuffer - (cnv.mousePos.x))/this.scrollBuffer * this.scrollMaxSpeed);
+    else {
+        if (mouseDownRight) {
+            activeRoom.scrollX -= this.cnv.mousePos.x - this.mousePrev.x;
+            activeRoom.scrollY -= this.cnv.mousePos.y - this.mousePrev.y;
+        }
     }
-    if (cnv.mousePos.y > cnv.height - this.scrollBuffer) {
-        activeRoom.scrollY += Math.round((this.scrollBuffer - (cnv.height - cnv.mousePos.y))/this.scrollBuffer * this.scrollMaxSpeed);
-    }
-    else if (cnv.mousePos.y < this.scrollBuffer) {
-        activeRoom.scrollY -= Math.round((this.scrollBuffer - (cnv.mousePos.y))/this.scrollBuffer * this.scrollMaxSpeed);
-    }
+    this.mousePrev = this.cnv.mousePos;
 }
 
 /**
