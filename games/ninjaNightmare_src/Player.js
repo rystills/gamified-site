@@ -81,7 +81,26 @@ Player.prototype.moveOutsideCollisions = function(isXAxis, moveSign, collidingOb
             }
         }
     }
+    if (collisionResolved) {
+        this.fixFloatRoundingPos();
+    }
     return collisionResolved;
+}
+
+/**
+ * adjust position to fix subtle floating point error after resolving collisions
+ */
+Player.prototype.fixFloatRoundingPos = function() {
+    for (let i = 0; i < 2; ++i) {
+        let posSplit = (""+(i == 0 ? this.x : this.y)).split('.');
+        if (posSplit.length > 1) {
+            let posDeci = posSplit[1].substring(0,3);
+            if (posDeci == '000' || posDeci == '999') {
+                if (i == 0) this.x = Math.round(this.x);
+                else this.y = Math.round(this.y);
+            }
+        }
+    }
 }
 
 /**
@@ -148,6 +167,7 @@ Player.prototype.nextToWall = function(dir) {
 Player.prototype.evaluateHorizontalCollisions = function() {
     let colResolved = this.moveOutsideCollisions(true,-Math.sign(this.xvel));
     if (colResolved) {
+        console.log(this.x);
         this.wallDir = this.xvel < 0 ? "left" : "right"
         this.wallJumpVelocityTimer = 0;
         this.xvel = 0;
@@ -289,8 +309,7 @@ Player.prototype.checkBelowMap = function() {
  * kill the player
  */
 Player.prototype.die = function() {
-    this.x = this.startX;
-    this.y = this.startY;
+    this.reset();
 }
 
 /**
