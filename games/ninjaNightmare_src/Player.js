@@ -68,39 +68,22 @@ Player.prototype.moveOutsideCollisions = function(isXAxis, moveSign, collidingOb
     
     if (collidingObject != null) {
         if (this.collide(collidingObject)) {
+            if (isXAxis) this.x = collidingObject.x + (moveSign == -1 ? -images[this.imgName].width : images[collidingObject.imgName].width);
+            else this.y = collidingObject.y + (moveSign == -1 ? -images[this.imgName].height : images[collidingObject.imgName].height);
             collisionResolved = true;
-            this.translate(isXAxis,(isXAxis ? this.intersect(collidingObject).x : this.intersect(collidingObject).y) * moveSign);
         }
     }
     else {
         let surroundingTiles = getSurroundingTiles(this);
         for (let i = 0; i < surroundingTiles.length; ++i) {
             if (tileProperties[surroundingTiles[i].type].state == tileStates.solid && this.collide(surroundingTiles[i])) {
+                if (isXAxis) this.x = surroundingTiles[i].x + (moveSign == -1 ? -images[this.imgName].width : images[surroundingTiles[i].imgName].width);
+                else this.y = surroundingTiles[i].y + (moveSign == -1 ? -images[this.imgName].height : images[surroundingTiles[i].imgName].height);
                 collisionResolved = true;
-                this.translate(isXAxis,(isXAxis ? this.intersect(surroundingTiles[i]).x : this.intersect(surroundingTiles[i]).y) * moveSign);
             }
         }
-    }
-    if (collisionResolved) {
-        this.fixFloatRoundingPos();
     }
     return collisionResolved;
-}
-
-/**
- * adjust position to fix subtle floating point error after resolving collisions
- */
-Player.prototype.fixFloatRoundingPos = function() {
-    for (let i = 0; i < 2; ++i) {
-        let posSplit = (""+(i == 0 ? this.x : this.y)).split('.');
-        if (posSplit.length > 1) {
-            let posDeci = posSplit[1].substring(0,3);
-            if (posDeci == '000' || posDeci == '999') {
-                if (i == 0) this.x = Math.round(this.x);
-                else this.y = Math.round(this.y);
-            }
-        }
-    }
 }
 
 /**
@@ -167,7 +150,6 @@ Player.prototype.nextToWall = function(dir) {
 Player.prototype.evaluateHorizontalCollisions = function() {
     let colResolved = this.moveOutsideCollisions(true,-Math.sign(this.xvel));
     if (colResolved) {
-        console.log(this.x);
         this.wallDir = this.xvel < 0 ? "left" : "right"
         this.wallJumpVelocityTimer = 0;
         this.xvel = 0;
