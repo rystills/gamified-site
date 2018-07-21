@@ -4,8 +4,9 @@ for (let i = 0; i < tileTypes.all.length; ++i) {
     placeTypes.add(tileTypes.all[i]);
     placeProperties[i] = {imgName: tileProperties[i].imgName};
 }
+
 /**
- * the Placer allows the user to add or remove elements in the level creator
+ * the Placer allows the user to add elements in the level creator
  * @param ctx: the context to which the placer belongs
  */
 makeChild("Placer","GameObject");

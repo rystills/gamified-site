@@ -53,7 +53,7 @@ Room.prototype.addObject = function(obj) {
  * @returns the newly removed object
  */
 Room.prototype.removeObject = function(obj) {
-    this.updateObjects.splice(this.updateOjects.indexOf(obj),1);
+    this.updateObjects.splice(this.updateObjects.indexOf(obj),1);
     this.renderObjects.splice(this.renderObjects.indexOf(obj),1);
     return obj;
 }
@@ -95,11 +95,23 @@ Room.prototype.addTile = function(tile,x,y) {
 
 /**
  * remove a tile from this room
+ * @param tile: the tile to remove
+ * @returns the newly removed tile
+ */
+Room.prototype.removeTile = function(tile) {
+    this.tiles[Math.floor(tile.x/gridSize)+","+Math.floor(tile.y/gridSize)] = null;
+    this.tileList.splice(this.tileList.indexOf(tile),1);
+    return tile;
+}
+
+
+/**
+ * remove a tile from this room
  * @param x: the x index of of the tile on the grid
  * @param y: the y index of the tile on the grid
  * @returns the newly removed tile
  */
-Room.prototype.removeTile = function(x,y) {
+Room.prototype.removeTilePos = function(x,y) {
     let tile = tiles[x+","+y];
     if (tile != null) {
         tiles[x+","+y] = null;

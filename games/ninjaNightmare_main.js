@@ -38,12 +38,12 @@ function loadAssets() {
 	requiredFiles = [
 		"src\\util.js","src\\setupKeyListeners.js", //util functions
 		"src\\classes\\Enum.js", "src\\classes\\Button.js", //util classes
-		"ninjaNightmare_images\\pipes.png", "ninjaNightmare_images\\player.png", //images
+		"ninjaNightmare_images\\pipes.png", "ninjaNightmare_images\\player.png", "ninjaNightmare_images\\eraser.png", //images
 		"targetTest_sounds\\confirm.ogg","targetTest_sounds\\select.ogg", //sounds
 		"ninjaNightmare_src\\GameObject.js","ninjaNightmare_src\\Enemy.js", //source files
 		"ninjaNightmare_src\\Tile.js","ninjaNightmare_src\\Particle.js","ninjaNightmare_src\\Player.js", //source files
 		"ninjaNightmare_src\\Room.js","ninjaNightmare_src\\TextBox.js", "ninjaNightmare_src\\Grid.js", //source files
-		"ninjaNightmare_src\\ScrollIndicator.js","ninjaNightmare_src\\Placer.js" //source files
+		"ninjaNightmare_src\\ScrollIndicator.js", "ninjaNightmare_src\\Placer.js","ninjaNightmare_src\\Eraser.js" //source files
 		];
 	
 	//manually load the asset loader
@@ -77,7 +77,9 @@ function initGlobals() {
 	rmCreate.addUI(new ScrollIndicator(5,25,uictx));
 	rmCreate.addUI(new Button(5,45,uicnv,"Playtest",24,togglePlaytest));
 	rmCreate.addUI(new Button(5,85,uicnv,"Place Ground Tile",24,activatePlacer,placeTypes.dirt));
+	rmCreate.addUI(new Button(5,125,uicnv,"Eraser",24,activateEraser));
 	placer = rmCreate.addUI(new Placer(cnv));
+	eraser = rmCreate.addUI(new Eraser(cnv));
 	rmCreate.addUI(new Grid(cnv));
 
 	//main menu room
@@ -110,14 +112,12 @@ function getSurroundingTiles(obj) {
 	let tileList = [];
 	for (let i = 0; i < 3; ++i) {
 		for (let r = 0; r < 3; ++r) {
-			console.log((gridX + i-1)+","+(gridY + r-1));
 			let curTile = activeRoom.tiles[(gridX + i-1)+","+(gridY + r-1)]; 
 			if (curTile != null && curTile != obj) {
 				tileList.push(curTile);
 			}
 		}
 	}
-	console.log(tileList);
 	return tileList;
 }
 
@@ -128,6 +128,14 @@ function getSurroundingTiles(obj) {
  */
 function activatePlacer(placeType, btn) {
 	placer.activate(placeType);
+}
+
+/**
+ * activate the level creator eraser
+ * @param btn: the button which triggered this function
+ */
+function activateEraser(btn) {
+	eraser.activate();
 }
 
 /**
