@@ -30,10 +30,8 @@ Placer.prototype.activate = function(type) {
  * check whether or not the Placer is currently colliding with anything
  */
 Placer.prototype.collisionDetected = function() {
-    for (let i = 0; i < activeRoom.tiles.length; ++i) {
-        if (this.collide(activeRoom.tiles[i])) {
-            return true;
-        }
+    if (activeRoom.tiles[Math.floor(this.x/gridSize)+","+Math.floor(this.y/gridSize)]) {
+        return true;
     }
     for (let i = 0; i < activeRoom.updateObjects.length; ++i) {
         if (this.collide(activeRoom.updateObjects[i])) {
@@ -62,7 +60,7 @@ Placer.prototype.update = function() {
     if (mouseDownLeft && !this.collisionDetected()) {
         //check whether we are adding a tile or an object
         if (tileTypes[placeTypes[placer.type]] != null) {
-            activeRoom.addTile(new Tile(this.x,this.y,this.type,this.ctx));
+            activeRoom.addTile(new Tile(this.x,this.y,this.type,this.ctx),Math.floor(this.x/gridSize),Math.floor(this.y/gridSize));
         }
         else {
             //objects need to be instantiated individually depending on their type ...

@@ -6,7 +6,8 @@ function Room(clearColor) {
     this.updateObjects = [];
     this.renderObjects = [];
     this.particles = []
-    this.tiles = [];
+    this.tiles = {};
+    this.tileList = [];
     this.ui = [];
     this.clearColor = clearColor;
     this.running = false;
@@ -80,20 +81,30 @@ Room.prototype.removeParticle = function(part) {
 /**
  * add a tile to this room
  * @param tile: the tile to add 
+ * @param x: the x index of of the tile on the grid
+ * @param y: the y index of the tile on the grid
  * @returns the newly added tile
  */
-Room.prototype.addTile = function(tile) {
-    this.tiles.push(tile);
+Room.prototype.addTile = function(tile,x,y) {
+    if (this.tiles[x+","+y] == null) {
+        this.tiles[x+","+y] = tile;
+        this.tileList.push(tile);
+    }
     return tile;
 }
 
 /**
  * remove a tile from this room
- * @param tile: the tile to remove
+ * @param x: the x index of of the tile on the grid
+ * @param y: the y index of the tile on the grid
  * @returns the newly removed tile
  */
-Room.prototype.removeTile = function(tile) {
-    this.tiles.splice(this.tiles.indexOf(tile),1);
+Room.prototype.removeTile = function(x,y) {
+    let tile = tiles[x+","+y];
+    if (tile != null) {
+        tiles[x+","+y] = null;
+        this.tileList.splice(this.tileList.indexOf(tile),1);
+    }
     return tile;
 }
 
@@ -124,8 +135,8 @@ Room.prototype.update = function() {
     //non-ui elements are ignored when the layer is active but not running (used for seamless level creator integration)
     if (this.running) {
         //update tiles
-        for (let i = 0; i < this.tiles.length; ++i) {
-            this.tiles[i].update();
+        for (let i = 0; i < this.tileList.length; ++i) {
+            this.tileList[i].update();
         }
         //update objects
         for (let i = 0; i < this.updateObjects.length; ++i) {
@@ -162,9 +173,10 @@ Room.prototype.render = function() {
     ctx.translate(-this.scrollX,-this.scrollY);
     
     //render tiles
-    for (let i = 0; i < this.tiles.length; ++i) {
-        this.tiles[i].render();
+    for (let i = 0; i < this.tileList.length; ++i) {
+        this.tileList[i].render();
     }
+    
     //render objects
     for (let i = 0; i < this.renderObjects.length; ++i) {
         this.renderObjects[i].render();

@@ -27,7 +27,7 @@ Player.prototype.reset = function() {
     this.xAccelAir = 1.5;
     this.xvelMax = 6;
     this.yAccel = .85;
-    this.yVelMax = 10;
+    this.yVelMax = 12;
     this.jumpVel = 11;
     this.wallJumpYVel = 9;
     this.walljumpXVel = 6;
@@ -73,10 +73,11 @@ Player.prototype.moveOutsideCollisions = function(isXAxis, moveSign, collidingOb
         }
     }
     else {
-        for (let i = 0; i < activeRoom.tiles.length; ++i) {
-            if (tileProperties[activeRoom.tiles[i].type].state == tileStates.solid && this.collide(activeRoom.tiles[i])) {
+        let surroundingTiles = getSurroundingTiles(this);
+        for (let i = 0; i < surroundingTiles.length; ++i) {
+            if (tileProperties[surroundingTiles[i].type].state == tileStates.solid && this.collide(surroundingTiles[i])) {
                 collisionResolved = true;
-                this.translate(isXAxis,(isXAxis ? this.intersect(activeRoom.tiles[i]).x : this.intersect(activeRoom.tiles[i]).y) * moveSign);
+                this.translate(isXAxis,(isXAxis ? this.intersect(surroundingTiles[i]).x : this.intersect(surroundingTiles[i]).y) * moveSign);
             }
         }
     }
@@ -130,8 +131,9 @@ Player.prototype.updateHorizontalMovement = function() {
 Player.prototype.nextToWall = function(dir) {
     this.x += (dir == "left" ? -1 : 1);
     let wallFound = false;
-    for (let i = 0; i < activeRoom.tiles.length; ++i) {
-        if (this.collide(activeRoom.tiles[i])) {
+    let surroundingTiles = getSurroundingTiles(this);
+    for (let i = 0; i < surroundingTiles.length; ++i) {
+        if (tileProperties[surroundingTiles[i].type].state == tileStates.solid && this.collide(surroundingTiles[i])) {
             wallFound = true;
             break;
         }
@@ -214,8 +216,9 @@ Player.prototype.updateGrounded = function() {
     let wasGrounded = this.grounded;
     this.grounded = false;
     this.y += 1;
-    for (let i = 0; i < activeRoom.tiles.length; ++i) {
-        if (tileProperties[activeRoom.tiles[i].type].state == tileStates.solid && this.collide(activeRoom.tiles[i])) {
+    let surroundingTiles = getSurroundingTiles(this);
+    for (let i = 0; i < surroundingTiles.length; ++i) {
+        if (tileProperties[surroundingTiles[i].type].state == tileStates.solid && this.collide(surroundingTiles[i])) {
             this.grounded = true;
             this.yvel = 0;
             break;
@@ -274,8 +277,8 @@ Player.prototype.evaluateGroundedOptions = function() {
  * check if the player has fallen below the map; if so, kill the player
  */
 Player.prototype.checkBelowMap = function() {
-    for (let i = 0; i < activeRoom.tiles.length; ++i) {
-        if (activeRoom.tiles[i].y > (this.y-100)) {
+    for (let i = 0; i < activeRoom.tileList.length; ++i) {
+        if (activeRoom.tileList[i].y > (this.y-100)) {
             return;
         }
     }

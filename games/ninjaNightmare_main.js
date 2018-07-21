@@ -98,6 +98,30 @@ function togglePlaytest(btn) {
 }
 
 /**
+ * get a list of the 0-9 tiles surrounding the designated object (0-8 if the object is a tile, as we don't count the input obj)
+ * @param obj: the object for whom we wish to locate surrounding tiles
+ * @returns a list of tiles surrounding the input object
+ */
+function getSurroundingTiles(obj) {
+	let cx = obj.cx();
+	let cy = obj.cy();
+	let gridX = Math.floor(cx/gridSize);
+	let gridY = Math.floor(cy/gridSize);
+	let tileList = [];
+	for (let i = 0; i < 3; ++i) {
+		for (let r = 0; r < 3; ++r) {
+			console.log((gridX + i-1)+","+(gridY + r-1));
+			let curTile = activeRoom.tiles[(gridX + i-1)+","+(gridY + r-1)]; 
+			if (curTile != null && curTile != obj) {
+				tileList.push(curTile);
+			}
+		}
+	}
+	console.log(tileList);
+	return tileList;
+}
+
+/**
  * activate the level creator placer with the specified object/tile type
  * @param placeType: the type to set the placer to
  * @param btn: the button which triggered this function
