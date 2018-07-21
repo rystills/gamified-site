@@ -20,16 +20,16 @@ Eraser.prototype.activate = function() {
  * update the placer
  */
 Eraser.prototype.update = function() {
-    //deactivate on right click
-    if (mousePressedRight) {
+    //deactivate on click off-screen / on UI
+    if (mousePressedLeft && !pointInRect(this.cnv.mousePos.x,this.cnv.mousePos.y,this.cnv)) {
         this.active = false;
     }
-    if (!this.active) {
+    if (!this.active || activeRoom.running) {
         return;
     }
     //update position
-    this.x = activeRoom.scrollX + cnv.mousePos.x - (images[this.imgName].width/2);
-    this.y = activeRoom.scrollY + cnv.mousePos.y - (images[this.imgName].height/2);
+    this.x = activeRoom.scrollX + this.cnv.mousePos.x - (images[this.imgName].width/2);
+    this.y = activeRoom.scrollY + this.cnv.mousePos.y - (images[this.imgName].height/2);
 
     //erase blocks when left click is held
     if (mouseDownLeft) {

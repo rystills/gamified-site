@@ -73,6 +73,7 @@ function initGlobals() {
 
 	//level creator room
 	rmCreate = new Room("turquoise");
+	rmCreate.addUI(new Grid(cnv));
 	player = rmCreate.addObject(new Player(gridSize*4 + 16,gridSize*4 + 8,ctx));
 	rmCreate.addUI(new ScrollIndicator(5,25,uictx));
 	rmCreate.addUI(new Button(5,45,uicnv,"Playtest",24,togglePlaytest));
@@ -80,7 +81,6 @@ function initGlobals() {
 	rmCreate.addUI(new Button(5,125,uicnv,"Eraser",24,activateEraser));
 	placer = rmCreate.addUI(new Placer(cnv));
 	eraser = rmCreate.addUI(new Eraser(cnv));
-	rmCreate.addUI(new Grid(cnv));
 
 	//main menu room
 	rmMain = new Room("rgba(0,0,60)");

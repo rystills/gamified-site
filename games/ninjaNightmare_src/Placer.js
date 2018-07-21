@@ -46,16 +46,16 @@ Placer.prototype.collisionDetected = function() {
  * update the placer
  */
 Placer.prototype.update = function() {
-    //deactivate on right click
-    if (mousePressedRight) {
+    //deactivate on click off-screen / on UI
+    if (mousePressedLeft && !pointInRect(this.cnv.mousePos.x,this.cnv.mousePos.y,this.cnv)) {
         this.active = false;
     }
-    if (!this.active) {
+    if (!this.active || activeRoom.running) {
         return;
     }
     //update position
-    this.x = Math.floor((activeRoom.scrollX + cnv.mousePos.x)/gridSize)*gridSize;
-    this.y = Math.floor((activeRoom.scrollY + cnv.mousePos.y)/gridSize)*gridSize;
+    this.x = Math.floor((activeRoom.scrollX + this.cnv.mousePos.x)/gridSize)*gridSize;
+    this.y = Math.floor((activeRoom.scrollY + this.cnv.mousePos.y)/gridSize)*gridSize;
 
     //place blocks when left click is held if nothing occupies our current grid space
     if (mouseDownLeft && !this.collisionDetected()) {
@@ -73,7 +73,7 @@ Placer.prototype.update = function() {
  * render the placer
  */
 Placer.prototype.render = function() {
-    if (!this.active) {
+    if (!this.active || activeRoom.running) {
         return;
     }
     this.ctx.drawImage(images[this.imgName], this.x,this.y);
