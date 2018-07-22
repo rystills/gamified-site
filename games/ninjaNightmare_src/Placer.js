@@ -61,7 +61,17 @@ Placer.prototype.update = function() {
     if (mouseDownLeft && !this.collisionDetected()) {
         //check whether we are adding a tile or an object
         if (tileTypes[placeTypes[placer.type]] != null) {
-            activeRoom.addTile(new Tile(this.x,this.y,this.type,this.ctx),Math.floor(this.x/gridSize),Math.floor(this.y/gridSize));
+            let newTile = activeRoom.addTile(new Tile(this.x,this.y,this.type,this.ctx),Math.floor(this.x/gridSize),Math.floor(this.y/gridSize));
+            //alert tile below if it exists
+            let belowTile = activeRoom.tiles[Math.floor(this.x/gridSize)+","+Math.floor(this.y/gridSize+1)];
+            if (belowTile != null && (belowTile.type == tileTypes.dirt || belowTile.type == tileTypes.grass)) {
+                belowTile.setType(tileTypes.dirt);
+            }
+            //switch to dirt if above tile exists
+            let aboveTile = activeRoom.tiles[Math.floor(this.x/gridSize)+","+Math.floor(this.y/gridSize-1)];
+            if (aboveTile != null && (aboveTile.type == tileTypes.dirt || aboveTile.type == tileTypes.grass)) {
+                newTile.setType(tileTypes.dirt);
+            }
         }
         else {
             //objects need to be instantiated individually depending on their type ...

@@ -39,6 +39,7 @@ function loadAssets() {
 		"src\\util.js","src\\setupKeyListeners.js", //util functions
 		"src\\classes\\Enum.js", "src\\classes\\Button.js", //util classes
 		"ninjaNightmare_images\\pipes.png", "ninjaNightmare_images\\player.png", "ninjaNightmare_images\\eraser.png", //images
+		"ninjaNightmare_images\\dirt.png", "ninjaNightmare_images\\grass.png", //images
 		"targetTest_sounds\\confirm.ogg","targetTest_sounds\\select.ogg", //sounds
 		"ninjaNightmare_src\\GameObject.js","ninjaNightmare_src\\Enemy.js", //source files
 		"ninjaNightmare_src\\Tile.js","ninjaNightmare_src\\Particle.js","ninjaNightmare_src\\Player.js", //source files
@@ -77,7 +78,7 @@ function initGlobals() {
 	player = rmCreate.addObject(new Player(gridSize*4 + 16,gridSize*4 + 8,ctx));
 	rmCreate.addUI(new ScrollIndicator(5,25,uictx));
 	rmCreate.addUI(new Button(5,45,uicnv,"Playtest",24,togglePlaytest));
-	rmCreate.addUI(new Button(5,85,uicnv,"Place Ground Tile",24,activatePlacer,placeTypes.dirt));
+	rmCreate.addUI(new Button(5,85,uicnv,"Place Ground Tile",24,activatePlacer,placeTypes.grass));
 	rmCreate.addUI(new Button(5,125,uicnv,"Eraser",24,activateEraser));
 	placer = rmCreate.addUI(new Placer(cnv));
 	eraser = rmCreate.addUI(new Eraser(cnv));

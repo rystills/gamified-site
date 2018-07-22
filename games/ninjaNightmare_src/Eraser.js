@@ -37,6 +37,11 @@ Eraser.prototype.update = function() {
         for (let i = 0; i < colTiles.length; ++i) {
             if (this.collide(colTiles[i])) {
                 activeRoom.removeTile(colTiles[i]);
+                //alert tile below if it exists
+                let belowTile = activeRoom.tiles[Math.floor(colTiles[i].x/gridSize) + "," + Math.floor(colTiles[i].y/gridSize+1)];
+                if (belowTile != null && (belowTile.type == tileTypes.dirt || belowTile.type == tileTypes.grass)) {
+                    belowTile.setType(tileTypes.grass);
+                }
             }
         }
 
