@@ -2,6 +2,9 @@
  * update the button's state, activating it in the event of a mouse click
  */
 Button.prototype.update = function() {
+	if (this.activeFunc != null) {
+		this.active = this.activeFunc();
+	}
 	if (!this.active) {
 		this.blendWhiteness = 55;
 		return;
@@ -67,8 +70,9 @@ Button.prototype.update = function() {
  * @param fontSize: the font size of the button text
  * @param clickFunc: the function to be called when the button is triggered
  * @param clickArg: the argument to be passed in to the button's trigger function
+ * @param activeFunc: function which determines whether or not this button is active
  */
-function Button(x,y,cnv, text, fontSize, clickFunc,clickArg) {
+function Button(x,y,cnv, text, fontSize, clickFunc,clickArg,activeFunc=null) {
 	//initialize state
 	this.state = "neutral";
 	//whether or not the mouse button is held on us
@@ -95,6 +99,7 @@ function Button(x,y,cnv, text, fontSize, clickFunc,clickArg) {
 	this.measureWidth();
 	this.height = this.fontSize + 4;
 	this.active = true;
+	this.activeFunc = activeFunc;
 }
 
 /**

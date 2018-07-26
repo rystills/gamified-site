@@ -80,10 +80,10 @@ function initGlobals() {
 	goal = rmCreate.addObject(new Goal(gridSize*5,gridSize*4,ctx));
 	rmCreate.addUI(new ScrollIndicator(5,25,uictx));
 	rmCreate.addUI(new Button(5,45,uicnv,"Playtest",24,togglePlaytest));
-	rmCreate.addUI(new Button(5,85,uicnv,"Eraser",24,activateEraser));
-	rmCreate.addUI(new Button(5,125,uicnv,"Place Ground Tile",24,activatePlacer,placeTypes.grass));
-	rmCreate.addUI(new Button(5,165,uicnv,"Place Player",24,activatePlacer,placeTypes.player));
-	rmCreate.addUI(new Button(5,205,uicnv,"Place Goal",24,activatePlacer,placeTypes.goal));
+	rmCreate.addUI(new Button(5,85,uicnv,"Eraser",24,activateEraser,null,checkRoomInactive));
+	rmCreate.addUI(new Button(5,125,uicnv,"Place Ground Tile",24,activatePlacer,placeTypes.grass,checkRoomInactive));
+	rmCreate.addUI(new Button(5,165,uicnv,"Move Player",24,activatePlacer,placeTypes.player,checkRoomInactive));
+	rmCreate.addUI(new Button(5,205,uicnv,"Move Goal",24,activatePlacer,placeTypes.goal,checkRoomInactive));
 	placer = rmCreate.addUI(new Placer(cnv));
 	eraser = rmCreate.addUI(new Eraser(cnv));
 
@@ -93,6 +93,13 @@ function initGlobals() {
 	rmMain.addUI(new Button(cnv.width/2,cnv.height/2,cnv,"Create a Level",24,openLevelCreator));
 	
 	activeRoom = rmMain;
+}
+
+/**
+ * check whether or not the current room is inactive (used for button active determination)
+ */
+function checkRoomInactive() {
+	return !activeRoom.running;
 }
 
 /**
