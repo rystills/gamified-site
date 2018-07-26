@@ -4,6 +4,10 @@ for (let i = 0; i < tileTypes.all.length; ++i) {
     placeTypes.add(tileTypes.all[i]);
     placeProperties[i] = {imgName: tileProperties[i].imgName};
 }
+placeTypes.add("player");
+placeProperties[placeTypes.player] = {imgName: "player"};
+placeTypes.add("goal");
+placeProperties[placeTypes.goal] = {imgName: "goal"};
 
 /**
  * the Placer allows the user to add elements in the level creator
@@ -54,8 +58,8 @@ Placer.prototype.update = function() {
         return;
     }
     //update position
-    this.x = Math.floor((activeRoom.scrollX + this.cnv.mousePos.x)/gridSize)*gridSize;
-    this.y = Math.floor((activeRoom.scrollY + this.cnv.mousePos.y)/gridSize)*gridSize;
+    this.x = Math.floor((activeRoom.scrollX + this.cnv.mousePos.x)/gridSize)*gridSize + (gridSize-images[this.imgName].width)/2;
+    this.y = Math.floor((activeRoom.scrollY + this.cnv.mousePos.y)/gridSize)*gridSize + (gridSize-images[this.imgName].height)/2;
 
     //place blocks when left click is held if nothing occupies our current grid space
     if (mouseDownLeft && !this.collisionDetected()) {
@@ -74,7 +78,14 @@ Placer.prototype.update = function() {
             }
         }
         else {
-            //objects need to be instantiated individually depending on their type ...
+            //objects need to be instantiated individually depending on their type
+            if (this.type == placeTypes.player) {
+                player.setStartLocation(this.x,this.y);
+            }
+            else if (this.type == placeTypes.goal) {
+                goal.x = this.x;
+                goal.y = this.y;
+            }
         }
     }
 }

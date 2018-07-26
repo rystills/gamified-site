@@ -46,6 +46,10 @@ Eraser.prototype.update = function() {
         }
 
         for (let i = 0; i < activeRoom.updateObjects.length; ++i) {
+            //don't erase player
+            if (activeRoom.updateObjects[i] == player || activeRoom.updateObjects[i] == goal) {
+                continue;
+            }
             if (this.collide(activeRoom.updateObjects[i])) {
                 activeRoom.removeObject(activeRoom.updateObjects[i]);
                 --i;

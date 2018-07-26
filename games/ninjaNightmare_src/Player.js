@@ -6,11 +6,10 @@
  */
 makeChild("Player","GameObject");
 function Player(x,y,ctx) {
-    GameObject.call(this,x,y,"player",100,-100);
+    GameObject.call(this,x,y,"player",100,-100,ctx);
     this.startX = x;
     this.startY = y;
     this.reset();
-    this.ctx = ctx;
 }
 
 /**
@@ -94,6 +93,18 @@ Player.prototype.tickTimers = function() {
     this.jumpBuffer = clamp(this.jumpBuffer-1, 0, this.jumpMaxBuffer);
     this.wallJumpVelocityTimer = clamp(this.wallJumpVelocityTimer - 1, 0, this.wallJumpMaxVelocityTimer);
     this.dashTimer = clamp(this.dashTimer - 1, 0, this.dashMaxTimer);
+}
+
+/**
+ * set the player's start location
+ * @param x: the start x coordinate
+ * @param y: the start y coordinate
+ */
+Player.prototype.setStartLocation = function(x,y) {
+    this.startX = x;
+    this.startY = y;
+    this.x = x;
+    this.y = y;
 }
 
 /**
@@ -344,6 +355,22 @@ Player.prototype.updateDash = function() {
 }
 
 /**
+ * check if the player has just won the game
+ */
+Player.prototype.checkWon = function() {
+    if (this.collide(goal)) {
+        this.win();
+    }
+}
+
+/**
+ * initiate a win
+ */
+Player.prototype.win = function() {
+    this.reset();
+}
+
+/**
  * update the player character
  */
 Player.prototype.update = function() {
@@ -360,6 +387,7 @@ Player.prototype.update = function() {
     this.evaluateDash();
     this.updateDash();
     this.evaluateGroundedOptions();
+    this.checkWon();
     this.checkBelowMap();
 }
 

@@ -39,12 +39,13 @@ function loadAssets() {
 		"src\\util.js","src\\setupKeyListeners.js", //util functions
 		"src\\classes\\Enum.js", "src\\classes\\Button.js", //util classes
 		"ninjaNightmare_images\\pipes.png", "ninjaNightmare_images\\player.png", "ninjaNightmare_images\\eraser.png", //images
-		"ninjaNightmare_images\\dirt.png", "ninjaNightmare_images\\grass.png", //images
+		"ninjaNightmare_images\\dirt.png", "ninjaNightmare_images\\grass.png",  "ninjaNightmare_images\\goal.png",//images
 		"targetTest_sounds\\confirm.ogg","targetTest_sounds\\select.ogg", //sounds
 		"ninjaNightmare_src\\GameObject.js","ninjaNightmare_src\\Enemy.js", //source files
 		"ninjaNightmare_src\\Tile.js","ninjaNightmare_src\\Particle.js","ninjaNightmare_src\\Player.js", //source files
 		"ninjaNightmare_src\\Room.js","ninjaNightmare_src\\TextBox.js", "ninjaNightmare_src\\Grid.js", //source files
-		"ninjaNightmare_src\\ScrollIndicator.js", "ninjaNightmare_src\\Placer.js","ninjaNightmare_src\\Eraser.js" //source files
+		"ninjaNightmare_src\\ScrollIndicator.js", "ninjaNightmare_src\\Placer.js","ninjaNightmare_src\\Eraser.js", //source files
+		"ninjaNightmare_src\\Goal.js" //source files
 		];
 	
 	//manually load the asset loader
@@ -76,10 +77,13 @@ function initGlobals() {
 	rmCreate = new Room("turquoise");
 	rmCreate.addUI(new Grid(cnv));
 	player = rmCreate.addObject(new Player(gridSize*4 + 16,gridSize*4 + 8,ctx));
+	goal = rmCreate.addObject(new Goal(gridSize*5,gridSize*4,ctx));
 	rmCreate.addUI(new ScrollIndicator(5,25,uictx));
 	rmCreate.addUI(new Button(5,45,uicnv,"Playtest",24,togglePlaytest));
-	rmCreate.addUI(new Button(5,85,uicnv,"Place Ground Tile",24,activatePlacer,placeTypes.grass));
-	rmCreate.addUI(new Button(5,125,uicnv,"Eraser",24,activateEraser));
+	rmCreate.addUI(new Button(5,85,uicnv,"Eraser",24,activateEraser));
+	rmCreate.addUI(new Button(5,125,uicnv,"Place Ground Tile",24,activatePlacer,placeTypes.grass));
+	rmCreate.addUI(new Button(5,165,uicnv,"Place Player",24,activatePlacer,placeTypes.player));
+	rmCreate.addUI(new Button(5,205,uicnv,"Place Goal",24,activatePlacer,placeTypes.goal));
 	placer = rmCreate.addUI(new Placer(cnv));
 	eraser = rmCreate.addUI(new Eraser(cnv));
 
