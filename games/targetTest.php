@@ -11,10 +11,13 @@ include($_SERVER["DOCUMENT_ROOT"] . '/backend/session.php');
 	<link href="../../bootstrap.min.css" rel="stylesheet">
 	<!-- Custom styles for this template -->
 	<link href="../../instructions.css" rel="stylesheet">
-
+	<link href="../../navbar.css" rel="stylesheet">
 	<title>Target Test</title>
 	</head>
 <body style="background-color:#9666c6">
+<ul>
+  <li><a href="../../index.php"><h4>Home</h4></a></li>
+</ul>
 	<div id="canvasDiv" align="center">
 		<canvas id="cnv" width="800" height="600"></canvas><canvas 
 		id="uicnv" width=320" height="600"></canvas>

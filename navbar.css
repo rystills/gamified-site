@@ -1,0 +1,24 @@
+ul {
+  list-style-type: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  background-color: #5a3d77 !important;
+}
+
+li {
+  float: left !important;
+}
+
+li a {
+  display: block !important;
+  color: white !important;
+  text-align: center !important;
+  padding: 4px 12px !important;
+  text-decoration: none !important;
+}
+
+/* Change the link color to a darker color variant on hover */
+li a:hover {
+  background-color: #332344 !important;
+}
