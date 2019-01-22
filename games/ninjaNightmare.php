@@ -15,7 +15,7 @@ include($_SERVER["DOCUMENT_ROOT"] . '/backend/session.php');
 	<title>Ninja Nightmare</title>
 	</head>
 <body style="background-color:#9666c6">
-<ul>
+<ul class="unselectable">
   <li><a href="../../index.php"><h4>Home</h4></a></li>
 </ul>
 	<div id="canvasDiv" align="center">
