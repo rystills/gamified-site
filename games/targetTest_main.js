@@ -859,9 +859,8 @@ function resetGameState() {
 
 	maxNumShots = 2;
 	toggleAmmo(buttons[7]);
-	numShots = maxNumShots;
-	maxFuel = 100;
-	fuel = maxFuel;
+	maxFuel = 50;
+	toggleFuel(buttons[6]);
 	choosingPower = false;
 
 	gameWon = false;
