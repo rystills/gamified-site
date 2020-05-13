@@ -479,3 +479,21 @@ function getURLParams() {
 	}
 	return query_string;
 }
+
+/**
+ * helper method for text rendering
+ * @param size: the font size
+ * @param color: the text color
+ * @param alignment: the text alignment
+ * @param text: the string to render
+ * @param x: the x coordinate of the text
+ * @param y: the y coordinate of the text
+ * @param font: the name of the font in which to render the text
+ */
+function drawText(size,color,alignment,text,x,y,font="Arial") {
+	ctx.font = size + "px " + font;
+	ctx.fillStyle = color;
+	ctx.textAlign=alignment;
+	ctx.fillText(text,x,y);
+	ctx.textAlign="start";
+}

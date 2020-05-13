@@ -79,33 +79,21 @@ function render() {
  * draw loading screen text
  */
 function drawLoadingText() {
-	ctx.font = "48px Arial";
-	ctx.fillStyle = "white";
-	ctx.textAlign="center";
-	ctx.fillText("Loading...",cnv.width/2,cnv.height/2);
-	ctx.textAlign="start";
+	drawText(48,"white","center","Loading...",cnv.width/2,cnv.height/2);
 }
 
 /**
  * draw victory text
  */
 function drawWinText() {
-	ctx.font = "48px Arial";
-	ctx.fillStyle = "white";
-	ctx.textAlign="center";
-	ctx.fillText("You Win!",cnv.width/2,cnv.height/2);
-	ctx.textAlign="start";
+	drawText(48,"white","center","You Win!",cnv.width/2,cnv.height/2);
 }
 
 /** 
  * draw losing text
  */
  function drawLoseText() {
-	ctx.font = "48px Arial";
-	ctx.fillStyle = "white";
-	ctx.textAlign="center";
-	ctx.fillText("You Lose!",cnv.width/2,cnv.height/2);
-	ctx.textAlign="start";
+	drawText(48,"white","center","You Lose!",cnv.width/2,cnv.height/2);
  }
 
  /**
@@ -113,27 +101,17 @@ function drawWinText() {
  */
 function drawLevelSelectText() {
 	//title
-	ctx.font = "64px Arial";
-	ctx.fillStyle = "white";
-	ctx.textAlign="center";
-	ctx.fillText("Select a Level",cnv.width/2,cnv.height/8);
-	ctx.textAlign="start";
+	drawText(64,"white","center","Select a Level",cnv.width/2,cnv.height/8);
 	
 	//page indicator
-	uictx.font = "24px Arial";
-	uictx.fillStyle = "white";
-	uictx.fillText("Page " + (curPage+1) + "/" + numPages,10,34);
+	drawText(24,"white","start","Page " + (curPage+1) + "/" + numPages,10,34);
 }
 
 /**
  * draw the text that is displayed on the main menu
  */
 function drawMainMenuText() {
-	ctx.font = "64px Arial";
-	ctx.fillStyle = "white";
-	ctx.textAlign="center";
-	ctx.fillText("Welcome To Target Test!",cnv.width/2,cnv.height/4);
-	ctx.textAlign="start";
+	drawText(64,"white","center","Welcome To Target Test!",cnv.width/2,cnv.height/4);
 }
 
 /**
@@ -184,9 +162,7 @@ function drawPowerBar() {
  * draw a meter indicating remaining fuel
  */
 function drawFuel() {
-	ctx.font = "12px Arial";
-	ctx.fillStyle = "white";
-	ctx.fillText("Fuel",20,20);
+	drawText(12,"white","start","Fuel",20,20);
 	ctx.fillStyle = "#CC4400";
 	ctx.fillRect(20,30,100,20);
 	ctx.fillStyle = "#BBFF00";
